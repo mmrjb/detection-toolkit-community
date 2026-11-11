@@ -1,0 +1,9 @@
+# Runtime data stays out of version control.
+data/*
+!data/README.md
+.env
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
