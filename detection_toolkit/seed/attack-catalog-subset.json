@@ -1,0 +1,1543 @@
+{
+ "version": "19.2",
+ "domain": "enterprise-attack",
+ "source_url": "https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/enterprise-attack/enterprise-attack-19.2.json",
+ "source_sha256": "dc1639caa5501d720e280cf1cbd8fbe009884a0c9b3e6e9ed9d0c25166c3d8f4",
+ "subset_note": "Subset of MITRE ATT&CK Enterprise 19.2 (ten technique families) bundled for the Detection Toolkit demo. Names, tactics, platforms and parent links are unchanged.",
+ "attribution": "\u00a9 2026 The MITRE Corporation. This work is reproduced and distributed with the permission of The MITRE Corporation.",
+ "tactics": [
+  {
+   "id": "TA0043",
+   "name": "Reconnaissance",
+   "shortname": "reconnaissance"
+  },
+  {
+   "id": "TA0042",
+   "name": "Resource Development",
+   "shortname": "resource-development"
+  },
+  {
+   "id": "TA0001",
+   "name": "Initial Access",
+   "shortname": "initial-access"
+  },
+  {
+   "id": "TA0002",
+   "name": "Execution",
+   "shortname": "execution"
+  },
+  {
+   "id": "TA0003",
+   "name": "Persistence",
+   "shortname": "persistence"
+  },
+  {
+   "id": "TA0004",
+   "name": "Privilege Escalation",
+   "shortname": "privilege-escalation"
+  },
+  {
+   "id": "TA0005",
+   "name": "Stealth",
+   "shortname": "stealth"
+  },
+  {
+   "id": "TA0112",
+   "name": "Defense Impairment",
+   "shortname": "defense-impairment"
+  },
+  {
+   "id": "TA0006",
+   "name": "Credential Access",
+   "shortname": "credential-access"
+  },
+  {
+   "id": "TA0007",
+   "name": "Discovery",
+   "shortname": "discovery"
+  },
+  {
+   "id": "TA0008",
+   "name": "Lateral Movement",
+   "shortname": "lateral-movement"
+  },
+  {
+   "id": "TA0009",
+   "name": "Collection",
+   "shortname": "collection"
+  },
+  {
+   "id": "TA0011",
+   "name": "Command and Control",
+   "shortname": "command-and-control"
+  },
+  {
+   "id": "TA0010",
+   "name": "Exfiltration",
+   "shortname": "exfiltration"
+  },
+  {
+   "id": "TA0040",
+   "name": "Impact",
+   "shortname": "impact"
+  }
+ ],
+ "techniques": [
+  {
+   "id": "T1003",
+   "name": "OS Credential Dumping",
+   "parent": "T1003",
+   "is_subtechnique": false,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "credential-access"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1003.001",
+   "name": "LSASS Memory",
+   "parent": "T1003",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "credential-access"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1003.002",
+   "name": "Security Account Manager",
+   "parent": "T1003",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "credential-access"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1003.003",
+   "name": "NTDS",
+   "parent": "T1003",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "credential-access"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1003.004",
+   "name": "LSA Secrets",
+   "parent": "T1003",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "credential-access"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1003.005",
+   "name": "Cached Domain Credentials",
+   "parent": "T1003",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "credential-access"
+   ],
+   "platforms": [
+    "Windows",
+    "Linux"
+   ]
+  },
+  {
+   "id": "T1003.006",
+   "name": "DCSync",
+   "parent": "T1003",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "credential-access"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1003.007",
+   "name": "Proc Filesystem",
+   "parent": "T1003",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "credential-access"
+   ],
+   "platforms": [
+    "Linux"
+   ]
+  },
+  {
+   "id": "T1003.008",
+   "name": "/etc/passwd and /etc/shadow",
+   "parent": "T1003",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "credential-access"
+   ],
+   "platforms": [
+    "Linux"
+   ]
+  },
+  {
+   "id": "T1021",
+   "name": "Remote Services",
+   "parent": "T1021",
+   "is_subtechnique": false,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "lateral-movement"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows",
+    "IaaS",
+    "ESXi"
+   ]
+  },
+  {
+   "id": "T1021.001",
+   "name": "Remote Desktop Protocol",
+   "parent": "T1021",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "lateral-movement"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1021.002",
+   "name": "SMB/Windows Admin Shares",
+   "parent": "T1021",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "lateral-movement"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1021.003",
+   "name": "Distributed Component Object Model",
+   "parent": "T1021",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "lateral-movement"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1021.004",
+   "name": "SSH",
+   "parent": "T1021",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "lateral-movement"
+   ],
+   "platforms": [
+    "ESXi",
+    "Linux",
+    "macOS"
+   ]
+  },
+  {
+   "id": "T1021.005",
+   "name": "VNC",
+   "parent": "T1021",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "lateral-movement"
+   ],
+   "platforms": [
+    "Linux",
+    "Windows",
+    "macOS"
+   ]
+  },
+  {
+   "id": "T1021.006",
+   "name": "Windows Remote Management",
+   "parent": "T1021",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "lateral-movement"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1021.007",
+   "name": "Cloud Services",
+   "parent": "T1021",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "lateral-movement"
+   ],
+   "platforms": [
+    "IaaS",
+    "Identity Provider",
+    "Office Suite",
+    "SaaS"
+   ]
+  },
+  {
+   "id": "T1021.008",
+   "name": "Direct Cloud VM Connections",
+   "parent": "T1021",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "lateral-movement"
+   ],
+   "platforms": [
+    "IaaS"
+   ]
+  },
+  {
+   "id": "T1027",
+   "name": "Obfuscated Files or Information",
+   "parent": "T1027",
+   "is_subtechnique": false,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "ESXi",
+    "Linux",
+    "macOS",
+    "Network Devices",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1027.001",
+   "name": "Binary Padding",
+   "parent": "T1027",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1027.002",
+   "name": "Software Packing",
+   "parent": "T1027",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1027.003",
+   "name": "Steganography",
+   "parent": "T1027",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1027.004",
+   "name": "Compile After Delivery",
+   "parent": "T1027",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1027.005",
+   "name": "Indicator Removal from Tools",
+   "parent": "T1027",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1027.006",
+   "name": "HTML Smuggling",
+   "parent": "T1027",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1027.007",
+   "name": "Dynamic API Resolution",
+   "parent": "T1027",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1027.008",
+   "name": "Stripped Payloads",
+   "parent": "T1027",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Network Devices",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1027.009",
+   "name": "Embedded Payloads",
+   "parent": "T1027",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1027.010",
+   "name": "Command Obfuscation",
+   "parent": "T1027",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1027.011",
+   "name": "Fileless Storage",
+   "parent": "T1027",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Linux",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1027.012",
+   "name": "LNK Icon Smuggling",
+   "parent": "T1027",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1027.013",
+   "name": "Encrypted/Encoded File",
+   "parent": "T1027",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1027.014",
+   "name": "Polymorphic Code",
+   "parent": "T1027",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1027.015",
+   "name": "Compression",
+   "parent": "T1027",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1027.016",
+   "name": "Junk Code Insertion",
+   "parent": "T1027",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1027.017",
+   "name": "SVG Smuggling",
+   "parent": "T1027",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1027.018",
+   "name": "Invisible Unicode",
+   "parent": "T1027",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1047",
+   "name": "Windows Management Instrumentation",
+   "parent": "T1047",
+   "is_subtechnique": false,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1053",
+   "name": "Scheduled Task/Job",
+   "parent": "T1053",
+   "is_subtechnique": false,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution",
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "Containers",
+    "ESXi",
+    "Linux",
+    "macOS",
+    "Network Devices",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1053.002",
+   "name": "At",
+   "parent": "T1053",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution",
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "Windows",
+    "Linux",
+    "macOS"
+   ]
+  },
+  {
+   "id": "T1053.003",
+   "name": "Cron",
+   "parent": "T1053",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution",
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "ESXi"
+   ]
+  },
+  {
+   "id": "T1053.005",
+   "name": "Scheduled Task",
+   "parent": "T1053",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution",
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1053.006",
+   "name": "Systemd Timers",
+   "parent": "T1053",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution",
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "Linux"
+   ]
+  },
+  {
+   "id": "T1053.007",
+   "name": "Container Orchestration Job",
+   "parent": "T1053",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution",
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "Containers"
+   ]
+  },
+  {
+   "id": "T1059",
+   "name": "Command and Scripting Interpreter",
+   "parent": "T1059",
+   "is_subtechnique": false,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution"
+   ],
+   "platforms": [
+    "Containers",
+    "ESXi",
+    "IaaS",
+    "Identity Provider",
+    "Linux",
+    "macOS",
+    "Network Devices",
+    "Office Suite",
+    "SaaS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1059.001",
+   "name": "PowerShell",
+   "parent": "T1059",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1059.002",
+   "name": "AppleScript",
+   "parent": "T1059",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution"
+   ],
+   "platforms": [
+    "macOS"
+   ]
+  },
+  {
+   "id": "T1059.003",
+   "name": "Windows Command Shell",
+   "parent": "T1059",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1059.004",
+   "name": "Unix Shell",
+   "parent": "T1059",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution"
+   ],
+   "platforms": [
+    "ESXi",
+    "Linux",
+    "macOS",
+    "Network Devices"
+   ]
+  },
+  {
+   "id": "T1059.005",
+   "name": "Visual Basic",
+   "parent": "T1059",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1059.006",
+   "name": "Python",
+   "parent": "T1059",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution"
+   ],
+   "platforms": [
+    "ESXi",
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1059.007",
+   "name": "JavaScript",
+   "parent": "T1059",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1059.008",
+   "name": "Network Device CLI",
+   "parent": "T1059",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution"
+   ],
+   "platforms": [
+    "Network Devices"
+   ]
+  },
+  {
+   "id": "T1059.009",
+   "name": "Cloud API",
+   "parent": "T1059",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution"
+   ],
+   "platforms": [
+    "IaaS",
+    "Identity Provider",
+    "Office Suite",
+    "SaaS"
+   ]
+  },
+  {
+   "id": "T1059.010",
+   "name": "AutoHotKey & AutoIT",
+   "parent": "T1059",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1059.011",
+   "name": "Lua",
+   "parent": "T1059",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution"
+   ],
+   "platforms": [
+    "Linux",
+    "Network Devices",
+    "Windows",
+    "macOS"
+   ]
+  },
+  {
+   "id": "T1059.012",
+   "name": "Hypervisor CLI",
+   "parent": "T1059",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution"
+   ],
+   "platforms": [
+    "ESXi"
+   ]
+  },
+  {
+   "id": "T1059.013",
+   "name": "Container CLI/API",
+   "parent": "T1059",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "execution"
+   ],
+   "platforms": [
+    "Containers"
+   ]
+  },
+  {
+   "id": "T1105",
+   "name": "Ingress Tool Transfer",
+   "parent": "T1105",
+   "is_subtechnique": false,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "command-and-control"
+   ],
+   "platforms": [
+    "ESXi",
+    "Linux",
+    "macOS",
+    "Network Devices",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1218",
+   "name": "System Binary Proxy Execution",
+   "parent": "T1218",
+   "is_subtechnique": false,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1218.001",
+   "name": "Compiled HTML File",
+   "parent": "T1218",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1218.002",
+   "name": "Control Panel",
+   "parent": "T1218",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1218.003",
+   "name": "CMSTP",
+   "parent": "T1218",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1218.004",
+   "name": "InstallUtil",
+   "parent": "T1218",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1218.005",
+   "name": "Mshta",
+   "parent": "T1218",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1218.007",
+   "name": "Msiexec",
+   "parent": "T1218",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1218.008",
+   "name": "Odbcconf",
+   "parent": "T1218",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1218.009",
+   "name": "Regsvcs/Regasm",
+   "parent": "T1218",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1218.010",
+   "name": "Regsvr32",
+   "parent": "T1218",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1218.011",
+   "name": "Rundll32",
+   "parent": "T1218",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1218.012",
+   "name": "Verclsid",
+   "parent": "T1218",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1218.013",
+   "name": "Mavinject",
+   "parent": "T1218",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1218.014",
+   "name": "MMC",
+   "parent": "T1218",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1218.015",
+   "name": "Electron Applications",
+   "parent": "T1218",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "stealth"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1547",
+   "name": "Boot or Logon Autostart Execution",
+   "parent": "T1547",
+   "is_subtechnique": false,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows",
+    "Network Devices"
+   ]
+  },
+  {
+   "id": "T1547.001",
+   "name": "Registry Run Keys / Startup Folder",
+   "parent": "T1547",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1547.002",
+   "name": "Authentication Package",
+   "parent": "T1547",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1547.003",
+   "name": "Time Providers",
+   "parent": "T1547",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1547.004",
+   "name": "Winlogon Helper DLL",
+   "parent": "T1547",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1547.005",
+   "name": "Security Support Provider",
+   "parent": "T1547",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1547.006",
+   "name": "Kernel Modules and Extensions",
+   "parent": "T1547",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "macOS",
+    "Linux"
+   ]
+  },
+  {
+   "id": "T1547.007",
+   "name": "Re-opened Applications",
+   "parent": "T1547",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "macOS"
+   ]
+  },
+  {
+   "id": "T1547.008",
+   "name": "LSASS Driver",
+   "parent": "T1547",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1547.009",
+   "name": "Shortcut Modification",
+   "parent": "T1547",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1547.010",
+   "name": "Port Monitors",
+   "parent": "T1547",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1547.012",
+   "name": "Print Processors",
+   "parent": "T1547",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1547.013",
+   "name": "XDG Autostart Entries",
+   "parent": "T1547",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "Linux"
+   ]
+  },
+  {
+   "id": "T1547.014",
+   "name": "Active Setup",
+   "parent": "T1547",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1547.015",
+   "name": "Login Items",
+   "parent": "T1547",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "persistence",
+    "privilege-escalation"
+   ],
+   "platforms": [
+    "macOS"
+   ]
+  },
+  {
+   "id": "T1566",
+   "name": "Phishing",
+   "parent": "T1566",
+   "is_subtechnique": false,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "initial-access"
+   ],
+   "platforms": [
+    "Identity Provider",
+    "Linux",
+    "macOS",
+    "Office Suite",
+    "SaaS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1566.001",
+   "name": "Spearphishing Attachment",
+   "parent": "T1566",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "initial-access"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1566.002",
+   "name": "Spearphishing Link",
+   "parent": "T1566",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "initial-access"
+   ],
+   "platforms": [
+    "Identity Provider",
+    "Linux",
+    "macOS",
+    "Office Suite",
+    "SaaS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1566.003",
+   "name": "Spearphishing via Service",
+   "parent": "T1566",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "initial-access"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows"
+   ]
+  },
+  {
+   "id": "T1566.004",
+   "name": "Spearphishing Voice",
+   "parent": "T1566",
+   "is_subtechnique": true,
+   "revoked": false,
+   "deprecated": false,
+   "tactics": [
+    "initial-access"
+   ],
+   "platforms": [
+    "Linux",
+    "macOS",
+    "Windows",
+    "Identity Provider"
+   ]
+  }
+ ]
+}

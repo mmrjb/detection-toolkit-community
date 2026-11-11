@@ -1,0 +1,828 @@
+{
+ "note": "Demo environment telemetry. Statuses are synthetic and describe a small Windows lab, not a real network.",
+ "event_types": [
+  {
+   "key": "sysmon_1",
+   "data_source": "Windows Sysmon EID 1",
+   "label": "Sysmon Event ID 1 - Process creation",
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "event_id": 1,
+   "fields": [
+    "UtcTime",
+    "ProcessGuid",
+    "ProcessId",
+    "Image",
+    "FileVersion",
+    "Description",
+    "Product",
+    "Company",
+    "OriginalFileName",
+    "CommandLine",
+    "CurrentDirectory",
+    "User",
+    "LogonGuid",
+    "LogonId",
+    "TerminalSessionId",
+    "IntegrityLevel",
+    "Hashes",
+    "ParentProcessGuid",
+    "ParentProcessId",
+    "ParentImage",
+    "ParentCommandLine",
+    "ParentUser"
+   ]
+  },
+  {
+   "key": "security_4688",
+   "data_source": "Windows Security 4688",
+   "label": "Security Event ID 4688 - A new process has been created",
+   "channel": "Security",
+   "event_id": 4688,
+   "fields": [
+    "SubjectUserSid",
+    "SubjectUserName",
+    "SubjectDomainName",
+    "SubjectLogonId",
+    "NewProcessId",
+    "NewProcessName",
+    "TokenElevationType",
+    "ProcessId",
+    "CommandLine",
+    "TargetUserName",
+    "ParentProcessName",
+    "MandatoryLabel"
+   ]
+  },
+  {
+   "key": "sysmon_10",
+   "data_source": "Windows Sysmon EID 10",
+   "label": "Sysmon Event ID 10 - Process access",
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "event_id": 10,
+   "fields": [
+    "UtcTime",
+    "SourceProcessGUID",
+    "SourceProcessId",
+    "SourceThreadId",
+    "SourceImage",
+    "TargetProcessGUID",
+    "TargetProcessId",
+    "TargetImage",
+    "GrantedAccess",
+    "CallTrace",
+    "SourceUser",
+    "TargetUser"
+   ]
+  },
+  {
+   "key": "sysmon_13",
+   "data_source": "Windows Sysmon EID 13",
+   "label": "Sysmon Event ID 13 - Registry value set",
+   "channel": "Microsoft-Windows-Sysmon/Operational",
+   "event_id": 13,
+   "fields": [
+    "EventType",
+    "UtcTime",
+    "ProcessGuid",
+    "ProcessId",
+    "Image",
+    "TargetObject",
+    "Details",
+    "User"
+   ]
+  },
+  {
+   "key": "powershell_4104",
+   "data_source": "PowerShell 4104",
+   "label": "PowerShell Event ID 4104 - Script block logging",
+   "channel": "Microsoft-Windows-PowerShell/Operational",
+   "event_id": 4104,
+   "fields": [
+    "MessageNumber",
+    "MessageTotal",
+    "ScriptBlockText",
+    "ScriptBlockId",
+    "Path"
+   ]
+  }
+ ],
+ "logsource_map": [
+  {
+   "product": "windows",
+   "category": "process_creation",
+   "service": "",
+   "event_type": "sysmon_1",
+   "preference": 1,
+   "field_map": {
+    "Image": "Image",
+    "OriginalFileName": "OriginalFileName",
+    "CommandLine": "CommandLine",
+    "ParentImage": "ParentImage",
+    "ParentCommandLine": "ParentCommandLine",
+    "User": "User",
+    "IntegrityLevel": "IntegrityLevel",
+    "Hashes": "Hashes",
+    "CurrentDirectory": "CurrentDirectory",
+    "Company": "Company",
+    "Product": "Product",
+    "Description": "Description",
+    "FileVersion": "FileVersion",
+    "ProcessId": "ProcessId",
+    "ParentProcessId": "ParentProcessId",
+    "LogonId": "LogonId",
+    "ParentUser": "ParentUser"
+   }
+  },
+  {
+   "product": "windows",
+   "category": "process_creation",
+   "service": "",
+   "event_type": "security_4688",
+   "preference": 2,
+   "field_map": {
+    "Image": "NewProcessName",
+    "CommandLine": "CommandLine",
+    "ParentImage": "ParentProcessName",
+    "User": "SubjectUserName",
+    "IntegrityLevel": "MandatoryLabel"
+   }
+  },
+  {
+   "product": "windows",
+   "category": "process_access",
+   "service": "",
+   "event_type": "sysmon_10",
+   "preference": 1,
+   "field_map": {
+    "SourceImage": "SourceImage",
+    "TargetImage": "TargetImage",
+    "GrantedAccess": "GrantedAccess",
+    "CallTrace": "CallTrace",
+    "SourceUser": "SourceUser",
+    "TargetUser": "TargetUser",
+    "SourceProcessId": "SourceProcessId",
+    "TargetProcessId": "TargetProcessId"
+   }
+  },
+  {
+   "product": "windows",
+   "category": "registry_set",
+   "service": "",
+   "event_type": "sysmon_13",
+   "preference": 1,
+   "field_map": {
+    "TargetObject": "TargetObject",
+    "Details": "Details",
+    "Image": "Image",
+    "EventType": "EventType",
+    "User": "User"
+   }
+  },
+  {
+   "product": "windows",
+   "category": "ps_script",
+   "service": "",
+   "event_type": "powershell_4104",
+   "preference": 1,
+   "field_map": {
+    "ScriptBlockText": "ScriptBlockText",
+    "Path": "Path",
+    "ScriptBlockId": "ScriptBlockId"
+   }
+  }
+ ],
+ "inventory": [
+  {
+   "data_source": "Windows Sysmon EID 1",
+   "aliases": "Sysmon Event ID 1; Sysmon process creation",
+   "category": "Endpoint",
+   "platform": "Windows",
+   "status": "Available",
+   "collected_fields": [
+    "UtcTime",
+    "ProcessGuid",
+    "ProcessId",
+    "Image",
+    "FileVersion",
+    "Description",
+    "Product",
+    "Company",
+    "OriginalFileName",
+    "CommandLine",
+    "CurrentDirectory",
+    "User",
+    "LogonGuid",
+    "LogonId",
+    "TerminalSessionId",
+    "IntegrityLevel",
+    "Hashes",
+    "ParentProcessGuid",
+    "ParentProcessId",
+    "ParentImage",
+    "ParentCommandLine",
+    "ParentUser"
+   ],
+   "notes": "Demo lab runs Sysmon with a process-creation configuration."
+  },
+  {
+   "data_source": "Windows Sysmon EID 3",
+   "aliases": "Sysmon Event ID 3; Sysmon network connection",
+   "category": "Endpoint",
+   "platform": "Windows",
+   "status": "Partial",
+   "collected_fields": [],
+   "notes": "Collected on two of the demo hosts only."
+  },
+  {
+   "data_source": "Windows Sysmon EID 7",
+   "aliases": "Sysmon Event ID 7; Sysmon image load",
+   "category": "Endpoint",
+   "platform": "Windows",
+   "status": "Missing",
+   "collected_fields": [],
+   "notes": "Not enabled in the demo configuration (high volume)."
+  },
+  {
+   "data_source": "Windows Sysmon EID 8",
+   "aliases": "Sysmon Event ID 8; CreateRemoteThread",
+   "category": "Endpoint",
+   "platform": "Windows",
+   "status": "Missing",
+   "collected_fields": [],
+   "notes": "Not enabled in the demo configuration."
+  },
+  {
+   "data_source": "Windows Sysmon EID 10",
+   "aliases": "Sysmon Event ID 10; Sysmon process access",
+   "category": "Endpoint",
+   "platform": "Windows",
+   "status": "Available",
+   "collected_fields": [
+    "UtcTime",
+    "SourceProcessGUID",
+    "SourceProcessId",
+    "SourceThreadId",
+    "SourceImage",
+    "TargetProcessGUID",
+    "TargetProcessId",
+    "TargetImage",
+    "GrantedAccess",
+    "CallTrace",
+    "SourceUser",
+    "TargetUser"
+   ],
+   "notes": "Collected for lsass.exe targets only."
+  },
+  {
+   "data_source": "Windows Sysmon EID 12",
+   "aliases": "Sysmon Event ID 12; registry object create and delete",
+   "category": "Endpoint",
+   "platform": "Windows",
+   "status": "Available",
+   "collected_fields": [],
+   "notes": ""
+  },
+  {
+   "data_source": "Windows Sysmon EID 13",
+   "aliases": "Sysmon Event ID 13; registry value set",
+   "category": "Endpoint",
+   "platform": "Windows",
+   "status": "Available",
+   "collected_fields": [
+    "EventType",
+    "UtcTime",
+    "ProcessGuid",
+    "ProcessId",
+    "Image",
+    "TargetObject",
+    "Details",
+    "User"
+   ],
+   "notes": "Run and RunOnce keys are in scope."
+  },
+  {
+   "data_source": "Windows Security 4688",
+   "aliases": "Security Event ID 4688; process creation auditing",
+   "category": "Endpoint",
+   "platform": "Windows",
+   "status": "Partial",
+   "collected_fields": [
+    "SubjectUserSid",
+    "SubjectUserName",
+    "SubjectDomainName",
+    "SubjectLogonId",
+    "NewProcessId",
+    "NewProcessName",
+    "TokenElevationType",
+    "ProcessId",
+    "TargetUserName",
+    "ParentProcessName",
+    "MandatoryLabel"
+   ],
+   "notes": "Process creation auditing is on, but command-line logging is off, so CommandLine is not collected."
+  },
+  {
+   "data_source": "Windows Security 4624",
+   "aliases": "Security Event ID 4624; successful logon",
+   "category": "Identity",
+   "platform": "Windows",
+   "status": "Available",
+   "collected_fields": [],
+   "notes": ""
+  },
+  {
+   "data_source": "Windows Security 4698",
+   "aliases": "Security Event ID 4698; scheduled task created",
+   "category": "Endpoint",
+   "platform": "Windows",
+   "status": "Available",
+   "collected_fields": [],
+   "notes": ""
+  },
+  {
+   "data_source": "Windows Security 4702",
+   "aliases": "Security Event ID 4702; scheduled task updated",
+   "category": "Endpoint",
+   "platform": "Windows",
+   "status": "Unknown",
+   "collected_fields": [],
+   "notes": "Audit policy not confirmed in the demo lab."
+  },
+  {
+   "data_source": "Windows Security 4776",
+   "aliases": "Security Event ID 4776; credential validation",
+   "category": "Identity",
+   "platform": "Windows",
+   "status": "Missing",
+   "collected_fields": [],
+   "notes": ""
+  },
+  {
+   "data_source": "Windows Security 5140",
+   "aliases": "Security Event ID 5140; network share accessed",
+   "category": "Endpoint",
+   "platform": "Windows",
+   "status": "Missing",
+   "collected_fields": [],
+   "notes": ""
+  },
+  {
+   "data_source": "PowerShell 4104",
+   "aliases": "PowerShell script block logging; ScriptBlockText",
+   "category": "Endpoint",
+   "platform": "Windows",
+   "status": "Missing",
+   "collected_fields": [],
+   "notes": "Script block logging is not enabled in the demo lab."
+  },
+  {
+   "data_source": "PowerShell 4103",
+   "aliases": "PowerShell module logging",
+   "category": "Endpoint",
+   "platform": "Windows",
+   "status": "Missing",
+   "collected_fields": [],
+   "notes": "Module logging is not enabled in the demo lab."
+  },
+  {
+   "data_source": "WMI-Activity 5857/5861",
+   "aliases": "WMI-Activity operational log",
+   "category": "Endpoint",
+   "platform": "Windows",
+   "status": "Missing",
+   "collected_fields": [],
+   "notes": ""
+  },
+  {
+   "data_source": "EDR Process Access",
+   "aliases": "EDR process access telemetry",
+   "category": "Endpoint",
+   "platform": "Windows",
+   "status": "Not Applicable",
+   "collected_fields": [],
+   "notes": "The demo lab has no EDR product."
+  },
+  {
+   "data_source": "Linux auditd execve",
+   "aliases": "auditd execve",
+   "category": "Endpoint",
+   "platform": "Linux",
+   "status": "Not Applicable",
+   "collected_fields": [],
+   "notes": "The demo lab is Windows-only."
+  },
+  {
+   "data_source": "Proxy Logs",
+   "aliases": "Web proxy logs",
+   "category": "Network",
+   "platform": "Network",
+   "status": "Partial",
+   "collected_fields": [],
+   "notes": "Only the lab egress proxy is logged."
+  },
+  {
+   "data_source": "Firewall Logs",
+   "aliases": "Network firewall logs",
+   "category": "Network",
+   "platform": "Network",
+   "status": "Available",
+   "collected_fields": [],
+   "notes": ""
+  },
+  {
+   "data_source": "DNS Logs",
+   "aliases": "DNS query logs",
+   "category": "Network",
+   "platform": "Network",
+   "status": "Available",
+   "collected_fields": [],
+   "notes": ""
+  },
+  {
+   "data_source": "Zeek HTTP",
+   "aliases": "Zeek http.log",
+   "category": "Network",
+   "platform": "Network",
+   "status": "Missing",
+   "collected_fields": [],
+   "notes": ""
+  },
+  {
+   "data_source": "Zeek SMB",
+   "aliases": "Zeek smb logs",
+   "category": "Network",
+   "platform": "Network",
+   "status": "Missing",
+   "collected_fields": [],
+   "notes": ""
+  },
+  {
+   "data_source": "RDP Gateway Logs",
+   "aliases": "Remote Desktop Gateway logs",
+   "category": "Network",
+   "platform": "Windows",
+   "status": "Not Applicable",
+   "collected_fields": [],
+   "notes": "No RD Gateway in the demo lab."
+  },
+  {
+   "data_source": "Email Gateway Logs",
+   "aliases": "Mail gateway logs",
+   "category": "Email",
+   "platform": "Email",
+   "status": "Missing",
+   "collected_fields": [],
+   "notes": "The demo lab has no mail flow."
+  },
+  {
+   "data_source": "Mail Security Logs",
+   "aliases": "Mail security attachment verdicts",
+   "category": "Email",
+   "platform": "Email",
+   "status": "Missing",
+   "collected_fields": [],
+   "notes": ""
+  }
+ ],
+ "technique_requirements_note": "Curated technique-to-data-source guidance from the earlier Detection Toolkit, limited to the demo techniques.",
+ "technique_requirements": [
+  {
+   "technique": "T1003",
+   "tactics": [
+    "Credential Access"
+   ],
+   "platforms": [
+    "Windows",
+    "Linux"
+   ],
+   "required": [
+    "Windows Sysmon EID 10",
+    "Windows Security 4688",
+    "EDR Process Access",
+    "Linux auditd execve"
+   ],
+   "minimum": [
+    "Windows Sysmon EID 10",
+    "Windows Security 4688"
+   ],
+   "preferred": [
+    "EDR Process Access"
+   ],
+   "guidance": "Prioritize process access and credential store access telemetry before writing credential dumping detections."
+  },
+  {
+   "technique": "T1003.001",
+   "tactics": [
+    "Credential Access"
+   ],
+   "platforms": [
+    "Windows"
+   ],
+   "required": [
+    "Windows Sysmon EID 10",
+    "Windows Security 4688",
+    "EDR Process Access"
+   ],
+   "minimum": [
+    "Windows Sysmon EID 10",
+    "Windows Security 4688"
+   ],
+   "preferred": [
+    "EDR Process Access"
+   ],
+   "guidance": "Use process access telemetry to monitor suspicious access to LSASS. Add allowlists for security tools and backup agents."
+  },
+  {
+   "technique": "T1059",
+   "tactics": [
+    "Execution"
+   ],
+   "platforms": [
+    "Windows",
+    "Linux"
+   ],
+   "required": [
+    "Windows Security 4688",
+    "Windows Sysmon EID 1",
+    "PowerShell 4104",
+    "Linux auditd execve"
+   ],
+   "minimum": [
+    "Windows Security 4688",
+    "Windows Sysmon EID 1"
+   ],
+   "preferred": [
+    "PowerShell 4104"
+   ],
+   "guidance": "Process command-line visibility is the minimum requirement. Script/content logging improves detection quality."
+  },
+  {
+   "technique": "T1059.001",
+   "tactics": [
+    "Execution"
+   ],
+   "platforms": [
+    "Windows"
+   ],
+   "required": [
+    "PowerShell 4104",
+    "PowerShell 4103",
+    "Windows Security 4688",
+    "Windows Sysmon EID 1"
+   ],
+   "minimum": [
+    "PowerShell 4104",
+    "Windows Security 4688"
+   ],
+   "preferred": [
+    "PowerShell 4103"
+   ],
+   "guidance": "Enable Script Block Logging 4104 before building advanced PowerShell detections."
+  },
+  {
+   "technique": "T1059.003",
+   "tactics": [
+    "Execution"
+   ],
+   "platforms": [
+    "Windows"
+   ],
+   "required": [
+    "Windows Security 4688",
+    "Windows Sysmon EID 1"
+   ],
+   "minimum": [
+    "Windows Security 4688"
+   ],
+   "preferred": [
+    "Windows Sysmon EID 1"
+   ],
+   "guidance": "Command-line logging is required to distinguish suspicious cmd.exe usage from normal administration."
+  },
+  {
+   "technique": "T1105",
+   "tactics": [
+    "Command and Control"
+   ],
+   "platforms": [
+    "Windows",
+    "Linux",
+    "Network"
+   ],
+   "required": [
+    "Proxy Logs",
+    "Firewall Logs",
+    "Zeek HTTP",
+    "Windows Sysmon EID 3"
+   ],
+   "minimum": [
+    "Proxy Logs",
+    "Firewall Logs"
+   ],
+   "preferred": [
+    "Zeek HTTP"
+   ],
+   "guidance": "Network egress telemetry is required. Endpoint network events improve host-level attribution."
+  },
+  {
+   "technique": "T1021.002",
+   "tactics": [
+    "Lateral Movement"
+   ],
+   "platforms": [
+    "Windows",
+    "Network"
+   ],
+   "required": [
+    "Windows Security 4624",
+    "Windows Security 5140",
+    "Zeek SMB",
+    "Windows Sysmon EID 3"
+   ],
+   "minimum": [
+    "Windows Security 4624",
+    "Windows Security 5140"
+   ],
+   "preferred": [
+    "Zeek SMB"
+   ],
+   "guidance": "Combine Windows logon/share access events with SMB network telemetry to detect suspicious lateral movement."
+  },
+  {
+   "technique": "T1021.001",
+   "tactics": [
+    "Lateral Movement"
+   ],
+   "platforms": [
+    "Windows",
+    "Network"
+   ],
+   "required": [
+    "Windows Security 4624",
+    "Windows Security 4776",
+    "RDP Gateway Logs",
+    "Firewall Logs"
+   ],
+   "minimum": [
+    "Windows Security 4624"
+   ],
+   "preferred": [
+    "RDP Gateway Logs"
+   ],
+   "guidance": "Authentication events are required. RDP gateway or firewall logs improve source/destination context."
+  },
+  {
+   "technique": "T1547.001",
+   "tactics": [
+    "Persistence",
+    "Privilege Escalation"
+   ],
+   "platforms": [
+    "Windows"
+   ],
+   "required": [
+    "Windows Sysmon EID 13",
+    "Windows Sysmon EID 12",
+    "Windows Security 4688"
+   ],
+   "minimum": [
+    "Windows Sysmon EID 13"
+   ],
+   "preferred": [
+    "Windows Sysmon EID 1"
+   ],
+   "guidance": "Registry modification telemetry is required for Run/RunOnce persistence monitoring."
+  },
+  {
+   "technique": "T1053.005",
+   "tactics": [
+    "Execution",
+    "Persistence",
+    "Privilege Escalation"
+   ],
+   "platforms": [
+    "Windows"
+   ],
+   "required": [
+    "Windows Security 4698",
+    "Windows Security 4702",
+    "Windows Sysmon EID 1"
+   ],
+   "minimum": [
+    "Windows Security 4698"
+   ],
+   "preferred": [
+    "Windows Security 4702"
+   ],
+   "guidance": "Scheduled task creation/update events are required; process telemetry helps attribute task creation."
+  },
+  {
+   "technique": "T1047",
+   "tactics": [
+    "Execution"
+   ],
+   "platforms": [
+    "Windows"
+   ],
+   "required": [
+    "Windows Security 4688",
+    "Windows Sysmon EID 1",
+    "WMI-Activity 5857/5861"
+   ],
+   "minimum": [
+    "Windows Security 4688",
+    "WMI-Activity 5857/5861"
+   ],
+   "preferred": [
+    "Windows Sysmon EID 1"
+   ],
+   "guidance": "WMI activity logs are important for distinguishing local process execution from WMI-based remote execution."
+  },
+  {
+   "technique": "T1218.011",
+   "tactics": [
+    "Defense Evasion"
+   ],
+   "platforms": [
+    "Windows"
+   ],
+   "required": [
+    "Windows Security 4688",
+    "Windows Sysmon EID 1",
+    "Windows Sysmon EID 7"
+   ],
+   "minimum": [
+    "Windows Security 4688",
+    "Windows Sysmon EID 1"
+   ],
+   "preferred": [
+    "Windows Sysmon EID 7"
+   ],
+   "guidance": "Rundll32 abuse requires process command-line visibility and sometimes image-load telemetry."
+  },
+  {
+   "technique": "T1218.010",
+   "tactics": [
+    "Defense Evasion"
+   ],
+   "platforms": [
+    "Windows"
+   ],
+   "required": [
+    "Windows Security 4688",
+    "Windows Sysmon EID 1"
+   ],
+   "minimum": [
+    "Windows Security 4688"
+   ],
+   "preferred": [
+    "Windows Sysmon EID 1"
+   ],
+   "guidance": "Regsvr32 detection requires command-line and network context for remote scriptlet abuse."
+  },
+  {
+   "technique": "T1566.001",
+   "tactics": [
+    "Initial Access"
+   ],
+   "platforms": [
+    "Email"
+   ],
+   "required": [
+    "Email Gateway Logs",
+    "Mail Security Logs",
+    "Proxy Logs"
+   ],
+   "minimum": [
+    "Email Gateway Logs"
+   ],
+   "preferred": [
+    "Mail Security Logs"
+   ],
+   "guidance": "Attachment-based phishing detections require email gateway telemetry and attachment metadata."
+  },
+  {
+   "technique": "T1566.002",
+   "tactics": [
+    "Initial Access"
+   ],
+   "platforms": [
+    "Email",
+    "Network"
+   ],
+   "required": [
+    "Email Gateway Logs",
+    "Proxy Logs",
+    "DNS Logs"
+   ],
+   "minimum": [
+    "Email Gateway Logs",
+    "Proxy Logs"
+   ],
+   "preferred": [
+    "DNS Logs"
+   ],
+   "guidance": "Link-based phishing needs email and web/proxy telemetry to connect the lure to user click behavior."
+  }
+ ]
+}

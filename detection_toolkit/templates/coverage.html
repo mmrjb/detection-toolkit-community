@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% import "_macros.html" as ui with context %}
+{% block title %}ATT&CK Coverage{% endblock %}
+{% block content %}
+{% set s = data.summary %}
+{% call ui.page_head("ATT&CK Coverage", "Which techniques in the bundled ATT&CK subset have rule content in the library, and which have lab validation. The two are counted separately.") %}
+  {% call ui.next_action(s.content_not_validated ~ " technique" ~ ('' if s.content_not_validated == 1 else 's') ~ " have rule content but no lab validation. Plan and record validation for one of them.") %}
+    <a class="button primary" href="{{ ctx_url('main.coverage_view', state='content_not_validated', tactic=tactic) }}">Show content without validation</a>
+    <a class="button" href="{{ ctx_url('main.gaps_view') }}">Back to Gap Prioritization</a>
+  {% endcall %}
+{% endcall %}
+
+<div class="notice two-col">
+  <p class="definition"><strong>Rule content available</strong> A rule in the library is mapped to the technique. It shows what you could adapt. It does not show that the rule works in your environment.</p>
+  <p class="definition"><strong>Lab validated</strong> A Rule Plan records lab validation evidence for this exact technique. Neither status means a detection is deployed.</p>
+</div>
+
+<div class="stats" role="list">
+  <div class="stat" role="listitem"><div class="value">{{ s.techniques }}</div><div class="name">Techniques in the bundled catalog</div></div>
+  <div class="stat" role="listitem"><div class="value">{{ s.with_content }}</div><div class="name">With rule content</div></div>
+  <div class="stat" role="listitem"><div class="value">{{ s.validated }}</div><div class="name">Lab validated</div></div>
+  <div class="stat" role="listitem"><div class="value">{{ s.content_not_validated }}</div><div class="name">Rule content, not lab validated</div></div>
+  <div class="stat" role="listitem"><div class="value">{{ s.no_content }}</div><div class="name">No rule content</div></div>
+</div>
+
+<form class="filters" method="get" action="{{ url_for('main.coverage_view') }}" role="search" aria-label="Filter techniques">
+  {{ ui.selection_fields() }}
+  <div class="field">
+    <label for="tactic">Tactic</label>
+    <select id="tactic" name="tactic">
+      <option value="">All tactics</option>
+      {% for key, name in data.tactics %}<option value="{{ key }}"{% if key == tactic %} selected{% endif %}>{{ name }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="state">Status</label>
+    <select id="state" name="state">
+      {% for key, label in state_filters.items() %}<option value="{{ key }}"{% if key == state %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="buttons">
+    <button class="button primary" type="submit">Apply filters</button>
+    <a class="button" href="{{ ctx_url('main.coverage_view') }}">Reset</a>
+  </div>
+</form>
+
+<div class="layout">
+<section aria-label="Techniques">
+{% if data.rows %}
+<div class="table-wrap">
+  <table class="data stack-sm">
+    <caption>{{ data.rows | length }} of {{ s.techniques }} techniques (ATT&amp;CK {{ data.attack_version }} subset). Rule counts link to Rule Search with the technique filter applied.</caption>
+    <thead>
+      <tr>
+        <th scope="col">Technique</th>
+        <th scope="col">Tactics</th>
+        <th scope="col">Rule content available</th>
+        <th scope="col">Lab validation</th>
+        <th scope="col">Next step</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for r in data.rows %}
+      {% set selected_row = (g.selection.technique == r.technique) %}
+      <tr class="{{ 'sub-row' if r.is_subtechnique else '' }}{{ ' is-selected' if selected_row else '' }}">
+        <td data-label="Technique" class="tech-name">
+          <a href="{{ ctx_url('main.coverage_view', technique=r.technique, tactic=tactic, state=(state if state != 'all' else None)) }}"><span class="tech-id">{{ r.technique }}</span> {{ r.name }}</a>
+          {% if selected_row %}<span class="visually-hidden"> (selected)</span>{% endif %}
+        </td>
+        <td data-label="Tactics">{{ r.tactics | join(', ') }}</td>
+        <td data-label="Rule content available">
+          {% if r.rule_count %}
+            <a href="{{ ctx_url('main.rules_view', technique=r.technique, scope='exact', rule=None) }}">{{ ui.badge('info', r.rule_count ~ ' rule' ~ ('' if r.rule_count == 1 else 's')) }}</a>
+          {% else %}
+            {{ ui.badge('neutral', 'No rule content') }}
+          {% endif %}
+          {% if not r.is_subtechnique and r.family_rule_count %}
+            <a class="small" href="{{ ctx_url('main.rules_view', technique=r.technique, scope='family', rule=None) }}">{{ r.family_rule_count }} in family</a>
+          {% endif %}
+        </td>
+        <td data-label="Lab validation">
+          {% set v = r.validation %}
+          {% if v.state == 'validated' %}
+            {{ ui.badge('ok', 'Lab validated') }}
+          {% elif v.state == 'planned' %}
+            {{ ui.badge('info', v.label) }}
+          {% else %}
+            {{ ui.badge('neutral', 'Not lab validated') }}
+          {% endif %}
+        </td>
+        <td data-label="Next step">
+          {% if v.plan %}
+            <a href="{{ ctx_url('main.plan_detail', plan_id=v.plan.id, technique=r.technique, rule=v.plan.rule_uid) }}">Reopen plan #{{ v.plan.id }}</a>
+          {% elif r.rule_count %}
+            <a href="{{ ctx_url('main.plan_new', technique=r.technique, rule=r.rules[0].uid, origin='coverage') }}">Plan validation</a>
+          {% else %}
+            <a href="{{ ctx_url('main.gaps_view', technique=r.technique) }}">See gap context</a>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+  {{ ui.empty("No technique matches these filters.", " Reset the filters to see the whole catalog subset.") }}
+{% endif %}
+</section>
+
+<aside class="panel sticky" aria-labelledby="cov-detail-heading">
+  {% set d = data.selected %}
+  {% if d %}
+    <div class="panel-head"><h2 id="cov-detail-heading"><span class="tech-id">{{ d.technique }}</span> {{ d.name }}</h2></div>
+    <dl class="meta">
+      <dt>Tactics</dt><dd>{{ d.tactics | join(', ') }}</dd>
+      <dt>Rule content</dt><dd>{% if d.rule_count %}{{ d.rule_count }} rule{{ '' if d.rule_count == 1 else 's' }} mapped to {{ d.technique }}{% else %}None in the library{% endif %}{% if not d.is_subtechnique %} · {{ d.family_rule_count }} in the family{% endif %}</dd>
+      <dt>Lab validation</dt><dd>{{ d.validation.label }}</dd>
+    </dl>
+    {% if d.rules %}
+      <div class="section">
+        <h3>Rules</h3>
+        <ul>{% for rr in d.rules %}<li><a href="{{ ctx_url('main.rules_view', technique=d.technique, rule=rr.uid) }}">{{ rr.title }}</a></li>{% endfor %}</ul>
+      </div>
+    {% endif %}
+    <div class="section actions">
+      {% if d.validation.plan %}
+        <a class="button primary" href="{{ ctx_url('main.plan_detail', plan_id=d.validation.plan.id, technique=d.technique, rule=d.validation.plan.rule_uid) }}">Reopen plan #{{ d.validation.plan.id }}</a>
+      {% elif d.rules %}
+        <a class="button primary" href="{{ ctx_url('main.plan_new', technique=d.technique, rule=d.rules[0].uid, origin='coverage') }}">Plan validation</a>
+      {% endif %}
+      {% if d.rules %}<a class="button" href="{{ ctx_url('main.data_sources_view', technique=d.technique, rule=d.rules[0].uid) }}">Map telemetry</a>{% endif %}
+      <a class="button" href="{{ ctx_url('main.gaps_view', technique=d.technique) }}">Gap context</a>
+    </div>
+  {% elif g.selection.technique %}
+    <h2 id="cov-detail-heading">Technique details</h2>
+    {{ ui.empty(g.selection.technique ~ " is not in the bundled ATT&CK subset.", " The demo catalog covers ten technique families. Gap Prioritization shows what is known about it.") }}
+    <p class="section"><a class="button" href="{{ ctx_url('main.gaps_view') }}">Gap context</a></p>
+  {% else %}
+    <h2 id="cov-detail-heading">Technique details</h2>
+    {{ ui.empty("No technique selected.", " Select a technique name in the table, or open one from another view, to see its rules and validation state here.") }}
+  {% endif %}
+</aside>
+</div>
+
+{% endblock %}

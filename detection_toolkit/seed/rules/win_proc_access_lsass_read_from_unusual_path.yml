@@ -1,0 +1,33 @@
+title: LSASS Opened With Memory-Read Access From an Unusual Path
+id: 2167ccb8-dd1b-4d09-9f91-dcad1b335253
+status: experimental
+description: >-
+  Detects a process outside the Windows and Program Files directories opening
+  lsass.exe with access rights that allow reading its memory.
+  Demo rule written for Detection Toolkit v0.1.
+references:
+  - https://attack.mitre.org/techniques/T1003/001/
+author: Detection Toolkit demo content
+date: 2026-11-11
+tags:
+  - attack.credential-access
+  - attack.t1003.001
+logsource:
+  category: process_access
+  product: windows
+detection:
+  selection:
+    TargetImage|endswith: '\lsass.exe'
+    GrantedAccess|contains:
+      - '0x1010'
+      - '0x1410'
+      - '0x1fffff'
+  filter_main_system_paths:
+    SourceImage|startswith:
+      - 'C:\Windows\System32\'
+      - 'C:\Program Files\'
+      - 'C:\Program Files (x86)\'
+  condition: selection and not filter_main_system_paths
+falsepositives:
+  - Security or backup tools installed outside Program Files
+level: high

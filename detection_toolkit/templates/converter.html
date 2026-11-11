@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% import "_macros.html" as ui with context %}
+{% block title %}Rule Converter{% endblock %}
+{% block content %}
+{% call ui.page_head("Rule Converter", "Convert a Sigma rule to Splunk SPL with pySigma. Load a rule from the library or paste Sigma YAML.") %}
+  {% if result %}
+    {% call ui.next_action("Copy the SPL, then record the rule, its telemetry and validation status in a Rule Plan.") %}
+      <a class="button primary" href="{{ ctx_url('main.plan_new', rule=(rule.uid if rule and not edited else None), technique=plan_technique, origin='converter') }}">Add to Rule Plan</a>
+      {% if rule %}<a class="button" href="{{ ctx_url('main.data_sources_view', rule=rule.uid) }}">Map telemetry</a>{% endif %}
+    {% endcall %}
+  {% else %}
+    {% call ui.next_action("Convert the rule below. The SPL appears with a copy button and any warnings.") %}
+      <a class="button" href="{{ ctx_url('main.rules_view') }}">Pick a rule in Rule Search</a>
+    {% endcall %}
+  {% endif %}
+{% endcall %}
+
+<form class="filters" method="get" action="{{ url_for('main.converter_view') }}" aria-label="Load a library rule">
+  <div class="field wide">
+    <label for="load-rule">Load a library rule</label>
+    <select id="load-rule" name="rule">
+      <option value="">Paste my own Sigma YAML</option>
+      {% for c in choices %}<option value="{{ c.uid }}"{% if rule and c.uid == rule.uid %} selected{% endif %}>{{ c.title }} ({{ c.techniques | join(', ') }})</option>{% endfor %}
+    </select>
+  </div>
+  <div class="buttons"><button class="button" type="submit">Load rule</button></div>
+</form>
+
+{% if rule %}
+  <div class="notice" role="status">
+    <p>Loaded from Rule Search: <strong>{{ rule.title }}</strong> ({{ rule.attribution.source }}, {{ rule.attribution.license }}).{% if edited %} The YAML below was edited after loading, so a plan created from this result will not link the library rule.{% endif %}</p>
+  </div>
+{% endif %}
+
+<form method="post" action="{{ url_for('main.converter_view') }}" class="panel" aria-labelledby="input-heading">
+  {{ ui.csrf_field() }}
+  {{ ui.selection_fields() }}
+  <h2 id="input-heading">Sigma rule</h2>
+  <div class="field">
+    <label for="sigma_yaml">Sigma YAML <span class="hint">One rule, up to 256 KiB</span></label>
+    <textarea id="sigma_yaml" name="sigma_yaml" class="tall" spellcheck="false" autocapitalize="off" autocomplete="off"{% if error %} aria-invalid="true" aria-describedby="convert-error"{% endif %}>{{ content }}</textarea>
+  </div>
+  <div class="form-grid">
+    <div class="field">
+      <label for="pipeline">pySigma processing pipeline</label>
+      <select id="pipeline" name="pipeline">
+        {% for key, label in pipelines.items() %}<option value="{{ key }}"{% if key == pipeline %} selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+      <span class="hint">The Windows pipeline maps EventID to EventCode and adds a source condition for service-based Windows log sources. Category-based rules such as process_creation get no index or source scope: add your own.</span>
+    </div>
+    <div class="field actions">
+      <button class="button primary" type="submit">Convert to SPL</button>
+    </div>
+  </div>
+</form>
+
+{% if error %}
+  <div class="error-box" role="alert" id="convert-error">
+    <strong>Conversion failed.</strong> {{ error }}
+  </div>
+{% endif %}
+
+{% if result %}
+<section class="panel" aria-labelledby="output-heading">
+  <div class="panel-head">
+    <h2 id="output-heading">Splunk SPL</h2>
+    <span class="chips">{{ ui.badge('ok' if result.quality.status == 'Production Review' else ('warn' if result.quality.status == 'Needs Tuning' else 'danger'), result.quality.status ~ ' · score ' ~ result.quality.score) }}</span>
+  </div>
+  <p class="small muted">{{ result.title }} · {{ result.pipeline_label }}</p>
+  <div class="copy-row">
+    <button class="button primary small" type="button" data-copy-target="spl-output" data-copy-status="spl-status">Copy SPL</button>
+    <span class="copy-status" id="spl-status" role="status" aria-live="polite"></span>
+  </div>
+  {% if result.spl %}
+    <pre class="code wrap" id="spl-output" tabindex="0">{{ result.spl }}</pre>
+  {% else %}
+    <div class="error-box" role="alert"><strong>pySigma returned no query.</strong> Check the warnings below.</div>
+  {% endif %}
+
+  <div class="two-col section">
+    <div>
+      <h3>Required fields</h3>
+      {% if result.required_fields %}<div class="chips">{% for f in result.required_fields %}<span class="chip mono">{{ f }}</span>{% endfor %}</div>{% else %}<p class="muted">None found.</p>{% endif %}
+      <h3 class="section">ATT&amp;CK</h3>
+      {% if result.techniques %}<div class="chips">{% for t in result.techniques %}{{ ui.technique_chip(t) }}{% endfor %}</div>{% else %}<p class="muted">No technique tag.</p>{% endif %}
+    </div>
+    <div>
+      <h3>Warnings</h3>
+      {% if result.warnings %}<ul>{% for w in result.warnings %}<li>{{ w }}</li>{% endfor %}</ul>{% else %}<p class="muted">None.</p>{% endif %}
+      <h3 class="section">Review notes</h3>
+      <ul>{% for n in result.quality.notes %}<li>{{ n }}</li>{% endfor %}</ul>
+    </div>
+  </div>
+
+  {% if result.savedsearches_conf %}
+  <details class="section">
+    <summary>savedsearches.conf snippet</summary>
+    <div class="copy-row">
+      <button class="button small" type="button" data-copy-target="saved-output" data-copy-status="saved-status">Copy snippet</button>
+      <span class="copy-status" id="saved-status" role="status" aria-live="polite"></span>
+    </div>
+    <pre class="code" id="saved-output" tabindex="0">{{ result.savedsearches_conf }}</pre>
+  </details>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

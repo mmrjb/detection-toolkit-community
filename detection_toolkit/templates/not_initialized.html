@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% set minimal = True %}
+{% block title %}Set up the database{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>The database is not ready</h1>
+    <p class="lede">Detection Toolkit needs its local SQLite database before the views can open.</p>
+  </div>
+</div>
+<div class="panel">
+  <p>The database at <code>{{ db_path }}</code> is <strong>{{ {'missing': 'missing', 'outdated': 'from another schema version', 'unreadable': 'unreadable (check the file permissions)'}.get(state, state) }}</strong>.</p>
+  <p>Stop the app, then run this command from the project directory and start it again:</p>
+  <pre class="code">python -m detection_toolkit init-db{% if state == 'outdated' %} --reset{% endif %}</pre>
+  {% if state == 'outdated' %}<p class="small muted"><code>--reset</code> rebuilds the database from the bundled demo data and deletes any rule plans in it.</p>{% endif %}
+  {% if state == 'unreadable' %}<p class="small muted">If the file is damaged rather than unreadable, <code>init-db --reset</code> rebuilds it from the bundled demo data, which deletes any rule plans in it. Copy the file somewhere safe first.</p>{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+[
+  {
+    "technique": "T1053.005",
+    "rule_file": "win_proc_creation_schtasks_user_writable_path.yml",
+    "title": "Scheduled task from a user-writable directory",
+    "priority": "Medium",
+    "status": "planned",
+    "validation_status": "not_assessed",
+    "telemetry": "Windows Sysmon EID 1 (Process creation): Image, CommandLine\nWindows Security 4688 (Process creation): NewProcessName, CommandLine",
+    "validation_notes": "Lab validation is pending for this synthetic sample.",
+    "notes": "Seeded by init-db as an example of a planned detection."
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "id": "dtk-demo",
+    "name": "Detection Toolkit demo rules",
+    "license": "CC0-1.0",
+    "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "homepage": "",
+    "notice": "Original synthetic Sigma rules written for the Detection Toolkit v0.1 demo. They are small teaching examples, not tuned production content."
+  }
+]

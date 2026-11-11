@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% import "_macros.html" as ui with context %}
+{% block title %}{{ ('Plan #' ~ plan.id) if plan else 'New rule plan' }}{% endblock %}
+{% block content %}
+{% set f = form %}
+{% if plan %}
+  {% call ui.page_head("Plan #" ~ plan.id ~ ": " ~ plan.title, "Update the selected rule, telemetry requirements, validation status and notes. Changes are saved to this edition's local database.") %}
+    {% call ui.next_action(("Record the lab evidence and mark the plan validated once the demo events behave as expected." if plan.validation_status != 'validated' else "This plan is lab validated. Check ATT&CK Coverage to see it counted.")) %}
+      {% if plan.rule_uid %}<a class="button primary" href="{{ ctx_url('main.data_sources_view', technique=plan.technique, rule=plan.rule_uid) }}">Run the sample check</a>{% endif %}
+      <a class="button" href="{{ ctx_url('main.coverage_view', technique=plan.technique, rule=plan.rule_uid) }}">See ATT&amp;CK Coverage</a>
+    {% endcall %}
+  {% endcall %}
+  <p class="chips">
+    {{ ui.plan_status_badge(plan) }} {{ ui.validation_badge(plan) }}
+    <span class="muted small">Created {{ plan.created_at[:19] | replace('T', ' ') }} UTC · updated {{ plan.updated_at[:19] | replace('T', ' ') }} UTC</span>
+  </p>
+  <nav class="actions" aria-label="Related views">
+    <a class="button small" href="{{ ctx_url('main.gaps_view', technique=plan.technique, rule=plan.rule_uid) }}">Gap context</a>
+    {% if plan.rule_uid %}
+      <a class="button small" href="{{ ctx_url('main.rules_view', technique=plan.technique, rule=plan.rule_uid) }}">Rule in Rule Search</a>
+      <a class="button small" href="{{ ctx_url('main.data_sources_view', technique=plan.technique, rule=plan.rule_uid) }}">Data Source Mapper</a>
+      <a class="button small" href="{{ ctx_url('main.converter_view', technique=plan.technique, rule=plan.rule_uid) }}">Rule Converter</a>
+    {% endif %}
+    <a class="button small" href="{{ url_for('main.plans_view') }}">All plans</a>
+  </nav>
+{% else %}
+  {% call ui.page_head("New rule plan", "Record the ATT&CK ID, the selected rule, its telemetry requirements and the validation status. Plans are stored only in this edition's local database.") %}
+    {% call ui.next_action("Check the prefilled values, then create the plan. You can reopen it later from Rule Plan.") %}
+      <a class="button" href="{{ ctx_url('main.plans_view') }}">Back to plans</a>
+    {% endcall %}
+  {% endcall %}
+{% endif %}
+
+{% if existing %}
+  <div class="flash" data-tone="warning" role="status">
+    Plan #{{ existing.id }} already covers this {{ 'rule' if f.rule_uid else 'technique' }}.
+    <a href="{{ ctx_url('main.plan_detail', plan_id=existing.id, technique=existing.technique, rule=existing.rule_uid) }}">Reopen plan #{{ existing.id }}</a> instead of creating a duplicate.
+  </div>
+{% endif %}
+{% if conflict %}
+  <div class="error-box" role="alert"><strong>Not saved.</strong> {{ conflict }}</div>
+{% endif %}
+{% if errors %}
+  <div class="error-box" role="alert">
+    <strong>Check the highlighted fields.</strong>
+    <ul>{% for name, message in errors.items() %}<li><a href="#{{ name }}">{{ message }}</a></li>{% endfor %}</ul>
+  </div>
+{% endif %}
+
+<form method="post" action="{{ url_for('main.plan_update', plan_id=plan.id) if plan else url_for('main.plan_create') }}" class="panel" novalidate>
+  {{ ui.csrf_field() }}
+  <input type="hidden" name="origin" value="{{ f.origin or 'manual' }}">
+  {% if plan %}<input type="hidden" name="expected_updated_at" value="{{ expected_updated_at or plan.updated_at }}">{% endif %}
+  <div class="form-grid">
+    <div class="field">
+      <label for="technique">ATT&amp;CK ID</label>
+      <input id="technique" name="technique" type="text" value="{{ f.technique or '' }}" list="technique-options" required autocomplete="off" placeholder="T1059.001"{{ ui.invalid_attrs(errors, 'technique') }}>
+      <datalist id="technique-options">{% for t in techniques %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}</datalist>
+      {{ ui.field_error(errors, 'technique') }}
+    </div>
+    <div class="field">
+      <label for="rule">Selected rule</label>
+      <select id="rule" name="rule"{{ ui.invalid_attrs(errors, 'rule') }}>
+        <option value="">No rule yet (technique-level plan)</option>
+        {% for c in rule_choices %}<option value="{{ c.uid }}"{% if c.uid == f.rule_uid %} selected{% endif %}>{{ c.title }} ({{ c.techniques | join(', ') }})</option>{% endfor %}
+      </select>
+      {{ ui.field_error(errors, 'rule') }}
+    </div>
+    <div class="field span-2">
+      <label for="title">Title <span class="hint">Leave empty to use the rule or technique name</span></label>
+      <input id="title" name="title" type="text" value="{{ f.title or '' }}" maxlength="200"{{ ui.invalid_attrs(errors, 'title') }}>
+      {{ ui.field_error(errors, 'title') }}
+    </div>
+    <div class="field">
+      <label for="status">Plan status</label>
+      <select id="status" name="status">
+        {% for key, label in statuses.items() %}<option value="{{ key }}"{% if key == f.status %} selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+      {{ ui.field_error(errors, 'status') }}
+    </div>
+    <div class="field">
+      <label for="priority">Priority</label>
+      <select id="priority" name="priority">
+        {% for p in priorities %}<option value="{{ p }}"{% if p == f.priority %} selected{% endif %}>{{ p }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field span-2">
+      <label for="telemetry">Telemetry requirements <span class="hint">One event type per line: data source, fields, availability</span></label>
+      <textarea id="telemetry" name="telemetry"{{ ui.invalid_attrs(errors, 'telemetry') }}>{{ f.telemetry or '' }}</textarea>
+      {{ ui.field_error(errors, 'telemetry') }}
+    </div>
+    <fieldset class="span-2" id="validation_status"{{ ui.invalid_attrs(errors, 'validation_status') }}>
+      <legend>Validation status</legend>
+      <div class="radio-row">
+        {% for key, label in validation_statuses.items() %}
+          <label><input type="radio" name="validation_status" value="{{ key }}"{% if key == f.validation_status %} checked{% endif %}> {{ label }}</label>
+        {% endfor %}
+      </div>
+      <p class="hint">Implementable and Lab validated need telemetry requirements. Blocked and Lab validated need validation notes. Lab validated also needs a selected rule. Rule content in the library alone never counts as validated.</p>
+      {{ ui.field_error(errors, 'validation_status') }}
+    </fieldset>
+    <div class="field span-2">
+      <label for="validation_notes">Validation notes <span class="hint">Lab evidence, test events, dates, results, or what blocks the rule</span></label>
+      <textarea id="validation_notes" name="validation_notes"{{ ui.invalid_attrs(errors, 'validation_notes') }}>{{ f.validation_notes or '' }}</textarea>
+      {{ ui.field_error(errors, 'validation_notes') }}
+    </div>
+    <div class="field span-2">
+      <label for="notes">Notes</label>
+      <textarea id="notes" name="notes"{{ ui.invalid_attrs(errors, 'notes') }}>{{ f.notes or '' }}</textarea>
+      {{ ui.field_error(errors, 'notes') }}
+    </div>
+  </div>
+  <div class="actions section">
+    <button class="button primary" type="submit">{{ 'Save changes' if plan else 'Create plan' }}</button>
+    <a class="button" href="{{ ctx_url('main.plans_view') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,28 @@
+title: Certutil Used to Download a File
+id: 54e6b696-3a97-49f6-b11e-550f4d3a4eac
+status: experimental
+description: >-
+  Detects certutil.exe using its URL cache feature to fetch content over HTTP
+  or HTTPS. Demo rule written for Detection Toolkit v0.1.
+references:
+  - https://attack.mitre.org/techniques/T1105/
+author: Detection Toolkit demo content
+date: 2026-11-11
+tags:
+  - attack.command-and-control
+  - attack.t1105
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_img:
+    - Image|endswith: '\certutil.exe'
+    - OriginalFileName: 'CertUtil.exe'
+  selection_cli:
+    CommandLine|contains|all:
+      - 'urlcache'
+      - 'http'
+  condition: all of selection_*
+falsepositives:
+  - Administrators testing certificate revocation URLs
+level: high

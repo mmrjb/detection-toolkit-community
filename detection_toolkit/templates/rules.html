@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% import "_macros.html" as ui with context %}
+{% block title %}Rule Search{% endblock %}
+{% block content %}
+{% set args = link_args %}
+{% set plan_technique = (query.technique if selected and query.technique in selected.techniques else (selected.techniques[0] if selected and selected.techniques else None)) %}
+{% call ui.page_head("Rule Search", "Search the rule library by keyword, ATT&CK ID and log source. Select a rule to see its details and where it comes from.") %}
+  {% if selected %}
+    {% call ui.next_action("Check which event types and fields \"" ~ selected.title ~ "\" needs, and whether the demo environment collects them.") %}
+      <a class="button primary" href="{{ ctx_url('main.data_sources_view', rule=selected.uid, technique=plan_technique) }}">Map telemetry</a>
+      <a class="button" href="{{ ctx_url('main.converter_view', rule=selected.uid, technique=plan_technique) }}">Convert to SPL</a>
+    {% endcall %}
+  {% else %}
+    {% call ui.next_action("Select a rule in the results to see its details, attribution and next steps.") %}
+      <a class="button" href="{{ ctx_url('main.gaps_view') }}">Find a technique to work on</a>
+    {% endcall %}
+  {% endif %}
+{% endcall %}
+
+<form class="filters" method="get" action="{{ url_for('main.rules_view') }}" role="search" aria-label="Filter rules">
+  <div class="field wide">
+    <label for="q">Keyword</label>
+    <input id="q" name="q" type="search" value="{{ query.q }}" maxlength="200" placeholder="Title, rule ID, description or YAML text">
+  </div>
+  <div class="field">
+    <label for="technique">ATT&amp;CK ID</label>
+    <input id="technique" name="technique" type="text" value="{{ query.technique }}" placeholder="T1059.001" pattern="[Tt][0-9]{4}(\.[0-9]{3})?" title="A technique ID such as T1059 or T1059.001" autocomplete="off">
+  </div>
+  <div class="field">
+    <label for="scope">ID match</label>
+    <select id="scope" name="scope">
+      <option value="exact"{% if query.scope == 'exact' %} selected{% endif %}>Exact ID</option>
+      <option value="family"{% if query.scope == 'family' %} selected{% endif %}>Whole family (parent and sub-techniques)</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="product">Log source product</label>
+    <select id="product" name="product">
+      <option value="">Any product</option>
+      {% for value, count in facets.product %}<option value="{{ value }}"{% if value == query.product %} selected{% endif %}>{{ value }} ({{ count }})</option>{% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="category">Log source category</label>
+    <select id="category" name="category">
+      <option value="">Any category</option>
+      {% for value, count in facets.category %}<option value="{{ value }}"{% if value == query.category %} selected{% endif %}>{{ value }} ({{ count }})</option>{% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="service">Log source service</label>
+    <select id="service" name="service">
+      <option value="">Any service</option>
+      {% for value, count in facets.service %}<option value="{{ value }}"{% if value == query.service %} selected{% endif %}>{{ value }} ({{ count }})</option>{% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="source">Source</label>
+    <select id="source" name="source">
+      <option value="">Any source</option>
+      {% for value, count in facets.source %}<option value="{{ value }}"{% if value == query.source %} selected{% endif %}>{{ sources.get(value, value) }} ({{ count }})</option>{% endfor %}
+    </select>
+  </div>
+  {% if g.selection.rule %}<input type="hidden" name="rule" value="{{ g.selection.rule }}">{% endif %}
+  <div class="buttons">
+    <button class="button primary" type="submit">Search</button>
+    <a class="button" href="{{ url_for('main.rules_view') }}">Reset</a>
+  </div>
+</form>
+
+{% if errors %}
+<div class="error-box" role="alert">
+  <strong>Some filters were ignored.</strong>
+  <ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul>
+</div>
+{% endif %}
+
+<div class="layout">
+  <section aria-labelledby="results-heading">
+    <div class="panel-head">
+      <h2 id="results-heading">{{ result.total }} rule{{ '' if result.total == 1 else 's' }}</h2>
+      {% if query.technique and query.scope == 'family' and result.technique_terms %}
+        <span class="muted small">Family terms: {{ result.technique_terms | join(', ') }}</span>
+      {% endif %}
+    </div>
+    {% if result.rows %}
+    <div class="table-wrap">
+      <table class="data stack-sm">
+        <thead>
+          <tr><th scope="col">Rule</th><th scope="col">ATT&amp;CK IDs</th><th scope="col">Log source</th><th scope="col">Level</th><th scope="col">Source</th></tr>
+        </thead>
+        <tbody>
+        {% for r in result.rows %}
+          {% set is_sel = selected and selected.uid == r.uid %}
+          <tr{% if is_sel %} class="is-selected"{% endif %}>
+            <td data-label="Rule"><a href="{{ url_for('main.rules_view', **dict(args, rule=r.uid)) }}"{% if is_sel %} aria-current="true"{% endif %}>{{ r.title }}</a></td>
+            <td data-label="ATT&amp;CK IDs"><div class="chips">{% for t in r.techniques %}<span class="chip mono">{{ t }}</span>{% endfor %}</div></td>
+            <td data-label="Log source">{{ r.logsource_label }}</td>
+            <td data-label="Level">{{ r.level or '-' }}</td>
+            <td data-label="Source">{{ r.source_name }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if result.pages > 1 %}
+    <nav class="pager" aria-label="Result pages">
+      {% if result.page > 1 %}<a class="button small" href="{{ ctx_url('main.rules_view', **dict(args, page=result.page - 1)) }}">Previous</a>{% endif %}
+      <span class="muted small">Page {{ result.page }} of {{ result.pages }}</span>
+      {% if result.page < result.pages %}<a class="button small" href="{{ ctx_url('main.rules_view', **dict(args, page=result.page + 1)) }}">Next</a>{% endif %}
+    </nav>
+    {% endif %}
+    {% else %}
+      {{ ui.empty("No rule matches these filters.", " Try the whole technique family, remove a log source filter, or reset the search.") }}
+    {% endif %}
+  </section>
+
+  <aside class="panel sticky" aria-labelledby="rule-heading">
+    {% if selected %}
+      {% set r = selected %}
+      <div class="panel-head"><h2 id="rule-heading">{{ r.title }}</h2></div>
+      {% if r.description %}<p class="prewrap">{{ r.description }}</p>{% endif %}
+      <dl class="meta">
+        <dt>ATT&amp;CK</dt><dd><div class="chips">{% for t in r.techniques %}{{ ui.technique_chip(t) }}{% endfor %}</div></dd>
+        <dt>Log source</dt><dd>{{ r.logsource_label }}</dd>
+        <dt>Level</dt><dd>{{ r.level or '-' }}</dd>
+        <dt>Status</dt><dd>{{ r.status or '-' }}</dd>
+        <dt>Rule ID</dt><dd class="mono">{{ r.rule_id or '-' }}</dd>
+        <dt>Date</dt><dd>{{ r.rule_date or '-' }}{% if r.modified %} (modified {{ r.modified }}){% endif %}</dd>
+      </dl>
+
+      <div class="section">
+        <h3>Source attribution</h3>
+        {% set a = r.attribution %}
+        <dl class="meta">
+          <dt>Source</dt><dd>{{ a.source }}</dd>
+          <dt>Author</dt><dd>{{ a.author or 'Not stated' }}</dd>
+          <dt>License</dt><dd>{% if a.license_url %}<a href="{{ a.license_url }}" rel="noopener noreferrer" target="_blank">{{ a.license }}<span class="visually-hidden"> (opens in a new tab)</span></a>{% else %}{{ a.license }}{% endif %}</dd>
+          <dt>File</dt><dd class="mono">{{ a.file_path }}</dd>
+          {% if a.reference_url %}<dt>Reference</dt><dd><a href="{{ a.reference_url }}" rel="noopener noreferrer" target="_blank">{{ a.reference_url }}<span class="visually-hidden"> (opens in a new tab)</span></a></dd>{% endif %}
+        </dl>
+        {% if a.notice %}<p class="small muted">{{ a.notice }}</p>{% endif %}
+      </div>
+
+      <div class="section">
+        <div class="copy-row">
+          <h3>Sigma YAML</h3>
+          <button class="button small" type="button" data-copy-target="rule-yaml" data-copy-status="rule-yaml-status">Copy YAML</button>
+          <span class="copy-status" id="rule-yaml-status" role="status" aria-live="polite"></span>
+        </div>
+        <pre class="code" id="rule-yaml" tabindex="0">{{ r.raw_yaml }}</pre>
+      </div>
+
+      <div class="section actions">
+        <a class="button primary" href="{{ ctx_url('main.data_sources_view', rule=r.uid, technique=plan_technique) }}">Map telemetry</a>
+        <a class="button" href="{{ ctx_url('main.converter_view', rule=r.uid, technique=plan_technique) }}">Convert to SPL</a>
+        <a class="button" href="{{ ctx_url('main.plan_new', rule=r.uid, technique=plan_technique, origin='rules') }}">Add to Rule Plan</a>
+        <a class="button" href="{{ ctx_url('main.gaps_view', technique=plan_technique, rule=r.uid) }}">Gap context</a>
+      </div>
+    {% else %}
+      <h2 id="rule-heading">Rule details</h2>
+      {{ ui.empty("No rule selected.", " Select a rule in the results to see its YAML, ATT&CK mapping and source attribution.") }}
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

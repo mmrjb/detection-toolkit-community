@@ -1,0 +1,29 @@
+title: WMIC Used to Start a Process
+id: d8bdd439-6795-4003-a634-f9c40f54e7b0
+status: experimental
+description: >-
+  Detects wmic.exe with "process call create", which starts a process through
+  WMI. Demo rule written for Detection Toolkit v0.1.
+references:
+  - https://attack.mitre.org/techniques/T1047/
+author: Detection Toolkit demo content
+date: 2026-11-11
+tags:
+  - attack.execution
+  - attack.t1047
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_img:
+    - Image|endswith: '\wmic.exe'
+    - OriginalFileName: 'wmic.exe'
+  selection_cli:
+    CommandLine|contains|all:
+      - 'process'
+      - 'call'
+      - 'create'
+  condition: all of selection_*
+falsepositives:
+  - Legacy administration scripts
+level: medium

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% import "_macros.html" as ui with context %}
+{% block title %}Error {{ status }}{% endblock %}
+{% block content %}
+{% call ui.page_head("Error " ~ status, message) %}
+  {% call ui.next_action("Go back, or start again from Gap Prioritization.") %}
+    <a class="button primary" href="{{ url_for('main.gaps_view') }}">Open Gap Prioritization</a>
+  {% endcall %}
+{% endcall %}
+{% endblock %}

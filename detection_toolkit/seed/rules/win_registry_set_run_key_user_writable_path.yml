@@ -1,0 +1,31 @@
+title: Run Key Value Pointing to a User-Writable Directory
+id: 4d9c3276-dbbe-4869-9be4-84fe7644623d
+status: experimental
+description: >-
+  Detects a Run or RunOnce registry value whose data points into a
+  user-writable directory. Demo rule written for Detection Toolkit v0.1.
+references:
+  - https://attack.mitre.org/techniques/T1547/001/
+author: Detection Toolkit demo content
+date: 2026-11-11
+tags:
+  - attack.persistence
+  - attack.privilege-escalation
+  - attack.t1547.001
+logsource:
+  category: registry_set
+  product: windows
+detection:
+  selection_key:
+    TargetObject|contains:
+      - '\Software\Microsoft\Windows\CurrentVersion\Run\'
+      - '\Software\Microsoft\Windows\CurrentVersion\RunOnce\'
+  selection_details:
+    Details|contains:
+      - '\AppData\'
+      - '\Temp\'
+      - '\Users\Public\'
+  condition: all of selection_*
+falsepositives:
+  - Per-user applications that start at logon from AppData
+level: medium

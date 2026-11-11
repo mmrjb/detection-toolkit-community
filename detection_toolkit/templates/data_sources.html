@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% import "_macros.html" as ui with context %}
+{% block title %}Data Source Mapper{% endblock %}
+{% block content %}
+{% set sel = g.selection or {} %}
+{% call ui.page_head("Data Source Mapper", "The event types and fields a selected rule needs, and which of them the demo environment collects.") %}
+  {% if rule %}
+    {% call ui.next_action(("The demo environment has what this rule needs. " if requirements.readiness == 'ready' else "Some telemetry for this rule is missing; record it in a plan. ") ~ "Convert the rule to SPL, then plan its validation.") %}
+      <a class="button primary" href="{{ ctx_url('main.converter_view', rule=rule.uid) }}">Convert to SPL</a>
+      <a class="button" href="{{ ctx_url('main.plan_new', rule=rule.uid, technique=(sel.technique or rule.techniques[0]), origin='data_sources') }}">Add to Rule Plan</a>
+    {% endcall %}
+  {% else %}
+    {% call ui.next_action("Choose a rule to see the event types and fields it requires.") %}
+      <a class="button" href="{{ ctx_url('main.rules_view') }}">Find a rule in Rule Search</a>
+    {% endcall %}
+  {% endif %}
+{% endcall %}
+
+<form class="filters" method="get" action="{{ url_for('main.data_sources_view') }}" aria-label="Choose a rule">
+  <div class="field wide">
+    <label for="rule">Rule</label>
+    <select id="rule" name="rule">
+      <option value="">Choose a rule</option>
+      {% for c in choices %}<option value="{{ c.uid }}"{% if rule and c.uid == rule.uid %} selected{% endif %}>{{ c.title }} ({{ c.techniques | join(', ') }})</option>{% endfor %}
+    </select>
+  </div>
+  <div class="buttons"><button class="button primary" type="submit">Show requirements</button></div>
+</form>
+
+{% if check_error %}
+  <div class="error-box" role="alert"><strong>The sample check did not run.</strong> {{ check_error }}</div>
+{% endif %}
+
+{% if rule %}
+<div class="layout">
+  <section aria-labelledby="req-heading">
+    <div class="panel">
+      <div class="panel-head">
+        <h2 id="req-heading">{{ rule.title }}</h2>
+        {{ ui.readiness_badge(requirements.readiness, requirements.readiness_label) }}
+      </div>
+      <dl class="meta">
+        <dt>Sigma log source</dt><dd>{{ rule.logsource_label }}</dd>
+        <dt>Detection fields</dt><dd>{% if requirements.fields %}<div class="chips">{% for f in requirements.fields %}<span class="chip mono">{{ f }}</span>{% endfor %}</div>{% else %}None (keyword search){% endif %}</dd>
+        <dt>ATT&amp;CK</dt><dd><div class="chips">{% for t in rule.techniques %}{{ ui.technique_chip(t) }}{% endfor %}</div></dd>
+      </dl>
+      <p class="small muted">Fields come from the detection block, including every OR branch, so a rule can match without every listed field.</p>
+    </div>
+
+    {% if requirements.event_types %}
+      {% for e in requirements.event_types %}
+      <div class="panel">
+        <div class="panel-head">
+          <h3>{{ e.label }}</h3>
+          <span class="chips">{{ ui.source_status_badge(e.status) }} {{ ui.readiness_badge(e.readiness, e.readiness_label) }}</span>
+        </div>
+        <p class="small muted">Data source "{{ e.data_source }}" · channel {{ e.channel or '-' }} · event ID {{ e.event_id if e.event_id is not none else '-' }}{% if e.notes %} · {{ e.notes }}{% endif %}</p>
+        <div class="table-wrap">
+          <table class="data stack-sm">
+            <caption>{{ e.collected_count }} of {{ e.fields | length }} detection fields collected in the demo environment</caption>
+            <thead><tr><th scope="col">Sigma field</th><th scope="col">Event field</th><th scope="col">Demo environment</th></tr></thead>
+            <tbody>
+            {% for f in e.fields %}
+              <tr>
+                <td data-label="Sigma field" class="mono">{{ f.sigma_field }}</td>
+                <td data-label="Event field" class="mono">{{ f.event_field or '-' }}</td>
+                <td data-label="Demo environment">{{ ui.badge({'collected': 'ok', 'not_collected': 'danger', 'not_in_event': 'neutral'}[f.state], f.state_label) }}</td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      {{ ui.empty("No event mapping for this log source.", " The bundled mapping covers Windows process_creation, process_access, registry_set and ps_script.") }}
+    {% endif %}
+
+    <div class="panel" aria-labelledby="events-heading">
+      <h3 id="events-heading">Demo events</h3>
+      {% if events %}
+        <p class="small muted">Synthetic events bundled with this rule. The local check runs the Sigma rule logic against them; it does not run the generated SPL.</p>
+        {% for ev in events %}
+          <div class="section">
+            <p><strong>{{ ev.label }}</strong> {{ ui.badge('accent' if ev.expectation == 'match' else 'neutral', 'Expected: ' ~ ('match' if ev.expectation == 'match' else 'no match')) }}</p>
+            <p class="small">{{ ev.explanation }}</p>
+            <details>
+              <summary>Show event fields</summary>
+              <pre class="code wrap">{{ ev.event | tojson(indent=2) }}</pre>
+            </details>
+          </div>
+        {% endfor %}
+        <form class="section" method="post" action="{{ url_for('main.data_sources_check') }}">
+          {{ ui.csrf_field() }}
+          <input type="hidden" name="rule" value="{{ rule.uid }}">
+          {% if sel.technique %}<input type="hidden" name="technique" value="{{ sel.technique }}">{% endif %}
+          <button class="button primary" type="submit">Run local sample check</button>
+        </form>
+        {% if check %}
+          <div class="section" role="status" aria-live="polite">
+            {% set outcome_tones = {'passed': 'ok', 'failed': 'danger', 'inconclusive': 'warn', 'unsupported': 'neutral', 'invalid': 'danger'} %}
+            <p>{{ ui.badge(outcome_tones.get(check.outcome, 'neutral'), 'Sample check: ' ~ check.outcome) }}</p>
+            <ul>{% for reason in check.reasons %}<li>{{ reason }}</li>{% endfor %}</ul>
+            {% if check.events %}
+            <div class="table-wrap">
+              <table class="data stack-sm">
+                <thead><tr><th scope="col">Event</th><th scope="col">Expected</th><th scope="col">Result</th></tr></thead>
+                <tbody>
+                {% for item in check.events %}
+                  {% set outcome_label = {'tp': 'Matched as expected', 'tn': 'Did not match, as expected', 'fp': 'Matched unexpectedly', 'fn': 'Did not match unexpectedly', 'unlabeled': 'No expectation'}[item.outcome] %}
+                  <tr>
+                    <td data-label="Event">{{ item.label }}</td>
+                    <td data-label="Expected">{{ 'match' if item.expect == 'match' else 'no match' }}</td>
+                    <td data-label="Result">{{ ui.badge('ok' if item.outcome in ('tp', 'tn') else 'danger', outcome_label) }}</td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% endif %}
+            <p class="small muted">{{ check.notes | join(' ') }} Engine: {{ check.engine }} {{ check.engine_version }}.</p>
+          </div>
+        {% endif %}
+      {% else %}
+        <p class="muted">No demo events are bundled for this rule. The PowerShell rule (T1059.001) has two.</p>
+      {% endif %}
+    </div>
+  </section>
+
+  <aside class="panel sticky" aria-labelledby="guidance-heading">
+    <h2 id="guidance-heading">Technique telemetry guidance</h2>
+    <p class="small muted">Curated, technique-level guidance checked against the demo inventory. It can be stricter than what this one rule needs.</p>
+    {% for gd in guidance %}
+      <div class="section">
+        <h3><span class="tech-id">{{ gd.technique }}</span> {{ ui.feasibility_badge(gd.feasibility) }}</h3>
+        {% if gd.mapped %}
+          <dl class="meta">
+            <dt>Required</dt><dd>{{ gd.mapping.required | join(', ') }}</dd>
+            <dt>Minimum</dt><dd>{{ gd.mapping.minimum | join(', ') }}</dd>
+            <dt>Available</dt><dd>{{ gd.available_sources | join(', ') or 'None' }}</dd>
+            <dt>Partial</dt><dd>{{ gd.partial_sources | join(', ') or 'None' }}</dd>
+            <dt>Missing</dt><dd>{{ gd.missing_sources | join(', ') or 'None' }}</dd>
+          </dl>
+          <p class="small">{{ gd.mapping.guidance }}</p>
+        {% endif %}
+        <p class="small muted">{{ gd.recommended_action }}</p>
+      </div>
+    {% else %}
+      <p class="muted">Select a rule or an ATT&amp;CK technique to see its guidance.</p>
+    {% endfor %}
+  </aside>
+</div>
+{% else %}
+  {% if guidance %}
+  <div class="panel">
+    <h2>Technique telemetry guidance</h2>
+    {% for gd in guidance %}
+      <p><span class="tech-id">{{ gd.technique }}</span> {{ ui.feasibility_badge(gd.feasibility) }} {{ gd.recommended_action }}</p>
+    {% endfor %}
+    <p class="small muted">Choose a rule above to see the exact event types and fields it needs.</p>
+  </div>
+  {% else %}
+    {{ ui.empty("No rule selected.", " Choose a rule above, or open one from Rule Search.") }}
+  {% endif %}
+{% endif %}
+
+<details class="panel">
+  <summary>Demo environment inventory ({{ inventory | length }} data sources: {{ inventory_summary['Available'] }} available, {{ inventory_summary['Partial'] }} partial, {{ inventory_summary['Missing'] }} missing)</summary>
+  <div class="table-wrap">
+    <table class="data stack-sm">
+      <caption>Synthetic statuses for a small Windows lab. They are not a real network.</caption>
+      <thead><tr><th scope="col">Data source</th><th scope="col">Category</th><th scope="col">Status</th><th scope="col">Notes</th></tr></thead>
+      <tbody>
+      {% for item in inventory %}
+        <tr>
+          <td data-label="Data source">{{ item.data_source }}</td>
+          <td data-label="Category">{{ item.category }}</td>
+          <td data-label="Status">{{ ui.source_status_badge(item.status) }}</td>
+          <td data-label="Notes">{{ item.notes or '-' }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</details>
+{% endblock %}

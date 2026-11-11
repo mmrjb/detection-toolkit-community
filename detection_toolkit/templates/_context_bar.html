@@ -1,0 +1,21 @@
+{#- Shared selection: shown on every view and carried by every link built with ctx_url. -#}
+{% set sel = g.selection or {} %}
+{% if (sel.technique or sel.rule) and request.endpoint %}
+  {% set clear_endpoint = {
+    'main.data_sources_check': 'main.data_sources_view',
+    'main.plan_create': 'main.plans_view',
+    'main.plan_update': 'main.plan_detail',
+    'main.plan_new': 'main.plans_view',
+  }.get(request.endpoint, request.endpoint) %}
+  <section class="context-bar" aria-label="Current selection">
+    <span class="label">Selection</span>
+    {% if sel.technique %}
+      <a class="chip" href="{{ ctx_url('main.gaps_view') }}">ATT&amp;CK <strong class="mono">{{ sel.technique }}</strong>{% if sel.technique_name %} {{ sel.technique_name }}{% endif %}</a>
+    {% endif %}
+    {% if sel.rule %}
+      <a class="chip" href="{{ ctx_url('main.rules_view') }}">Rule <strong>{{ sel.rule_title }}</strong></a>
+    {% endif %}
+    <span class="hint">Links to other views keep this selection.</span>
+    <a class="clear" href="{{ url_for(clear_endpoint, **(request.view_args or {})) }}">Clear selection</a>
+  </section>
+{% endif %}

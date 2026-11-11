@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% import "_macros.html" as ui with context %}
+{% block title %}Gap Prioritization{% endblock %}
+{% block content %}
+{% set top = snapshot.top[0] if snapshot.top else None %}
+{% call ui.page_head("Gap Prioritization", "Which ATT&CK technique families need rule work first, and why. Families are ranked by the sample threat reports, then by rule content you can adapt.") %}
+  {% if top %}
+    {% call ui.next_action("Start with " ~ top.technique ~ " " ~ top.name ~ ": " ~ (top.next_action.label | lower) ~ ", then check its telemetry.") %}
+      {% if top.next_action.view == 'plan' %}
+        <a class="button primary" href="{{ ctx_url('main.plan_new', technique=top.technique, rule=None, origin='gaps') }}">Create a rule plan</a>
+      {% else %}
+        {% if top.next_action.view == 'rules' %}
+          <a class="button primary" href="{{ ctx_url('main.rules_view', technique=top.technique, scope='exact', rule=top.first_rule) }}">{{ top.next_action.label }}</a>
+        {% else %}
+          <a class="button primary" href="{{ ctx_url('main.rules_view', technique=top.family, scope='family', rule=None) }}">{{ top.next_action.label }}</a>
+        {% endif %}
+      {% endif %}
+      <a class="button" href="{{ ctx_url('main.gaps_view', technique=top.technique) }}">Why {{ top.technique }}?</a>
+    {% endcall %}
+  {% else %}
+    {% call ui.next_action("No family needs new rule work. Review ATT&CK Coverage for content that is not lab validated yet.") %}
+      <a class="button primary" href="{{ ctx_url('main.coverage_view', state='content_not_validated') }}">Open ATT&amp;CK Coverage</a>
+    {% endcall %}
+  {% endif %}
+{% endcall %}
+
+<form class="filters" method="get" action="{{ url_for('main.gaps_view') }}" role="search" aria-label="Inspect a technique">
+  <div class="field">
+    <label for="technique">ATT&amp;CK ID <span class="hint">see why it is or is not ranked</span></label>
+    <input id="technique" name="technique" type="text" value="{{ g.selection.technique or '' }}" placeholder="T1059.001" pattern="[Tt][0-9]{4}(\.[0-9]{3})?" title="A technique ID such as T1059 or T1059.001" autocomplete="off">
+  </div>
+  {% if g.selection.rule %}<input type="hidden" name="rule" value="{{ g.selection.rule }}">{% endif %}
+  <div class="buttons">
+    <button class="button primary" type="submit">Inspect</button>
+    <a class="button" href="{{ ctx_url('main.gaps_view', technique=None) }}">Show the top item</a>
+  </div>
+</form>
+
+<div class="notice">
+  <p><strong>How to read this ranking.</strong> The sample threat reports are synthetic demo data, not real threat intelligence. The order is report priority (reports naming the family, then rank points), not a risk score. Telemetry readiness is shown for context and never changes the order. A family drops out once a plan covers it.</p>
+</div>
+
+<div class="layout">
+  <section aria-labelledby="top-heading">
+    <div class="panel-head">
+      <h2 id="top-heading">Top {{ snapshot.top | length }} recommended work item{{ '' if snapshot.top | length == 1 else 's' }}</h2>
+      <span class="muted small">{{ snapshot.reports | length }} sample reports · {{ snapshot.candidates | length }} eligible famil{{ 'y' if snapshot.candidates | length == 1 else 'ies' }}</span>
+    </div>
+    {% if snapshot.top %}
+    <ol class="rank-list">
+      {% for c in snapshot.top %}
+      <li class="rank-item{% if c.technique == focus %} is-selected{% endif %}">
+        <span class="rank-pos" aria-label="Rank {{ c.position }}">{{ c.position }}</span>
+        <div class="rank-title">
+          <a href="{{ ctx_url('main.gaps_view', technique=c.technique) }}"{% if c.technique == focus %} aria-current="true"{% endif %}><span class="tech-id">{{ c.technique }}</span> {{ c.name }}</a>
+          {% if c.family != c.technique %}<span class="muted small">family {{ c.family }} {{ c.family_name }}</span>{% endif %}
+        </div>
+        <div class="rank-meta">
+          {% if c.priority == 'report' %}
+            {{ ui.badge('accent', c.report_count ~ ' of ' ~ snapshot.reports | length ~ ' reports · ' ~ c.points ~ ' rank points') }}
+          {% else %}
+            {{ ui.badge('neutral', 'No report priority') }}
+          {% endif %}
+          {{ ui.badge('info' if c.family_rule_count else 'neutral', (c.family_rule_count ~ ' rule' ~ ('' if c.family_rule_count == 1 else 's') ~ ' in family') if c.family_rule_count else 'No rule content yet') }}
+          {{ ui.feasibility_badge(c.telemetry.feasibility) }}
+        </div>
+        <ul class="rank-why">
+          {% for reason in c.reasons[:2] %}<li>{{ reason }}</li>{% endfor %}
+        </ul>
+      </li>
+      {% endfor %}
+    </ol>
+    {% else %}
+      {{ ui.empty("No eligible family.", " Every family named by the sample reports is covered or already in a plan.") }}
+    {% endif %}
+
+    {% if snapshot.beyond_top %}
+    <details class="panel">
+      <summary>{{ snapshot.beyond_top | length }} more eligible famil{{ 'y' if snapshot.beyond_top | length == 1 else 'ies' }} beyond the Top 10</summary>
+      <ul>
+        {% for c in snapshot.beyond_top %}
+        <li><a href="{{ ctx_url('main.gaps_view', technique=c.technique) }}">#{{ c.position }} {{ c.technique }} {{ c.name }}</a></li>
+        {% endfor %}
+      </ul>
+    </details>
+    {% endif %}
+
+    <div class="section">
+      <h2 id="excluded-heading">Already covered or in a plan</h2>
+      {% if snapshot.excluded %}
+      <div class="table-wrap">
+        <table class="data stack-sm" aria-labelledby="excluded-heading">
+          <thead><tr><th scope="col">Family</th><th scope="col">Why it is not listed</th><th scope="col">Plans</th><th scope="col">Report priority</th></tr></thead>
+          <tbody>
+          {% for e in snapshot.excluded %}
+            <tr>
+              <td data-label="Family"><a href="{{ ctx_url('main.gaps_view', technique=e.family) }}"><span class="tech-id">{{ e.family }}</span> {{ e.family_name }}</a></td>
+              <td data-label="Why it is not listed">{{ ui.badge('ok' if e.reason == 'covered' else 'info', e.reason_label) }}</td>
+              <td data-label="Plans">
+                {% for p in e.plans %}<a href="{{ ctx_url('main.plan_detail', plan_id=p.id, technique=p.technique, rule=p.rule_uid) }}">Reopen plan #{{ p.id }}</a> <span class="muted small">({{ p.status_label }}, {{ p.validation_label }})</span>{% if not loop.last %}<br>{% endif %}{% endfor %}
+              </td>
+              <td data-label="Report priority">{% if e.reports %}{{ e.reports | length }} report{{ '' if e.reports | length == 1 else 's' }}, {{ e.points }} points{% else %}<span class="muted">None</span>{% endif %}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        {{ ui.empty("Nothing excluded yet.", " Families appear here once a rule plan covers them.") }}
+      {% endif %}
+    </div>
+  </section>
+
+  <aside class="panel sticky" aria-labelledby="detail-heading">
+    {% if detail %}
+      {% set d = detail %}
+      <div class="panel-head">
+        <h2 id="detail-heading"><span class="tech-id">{{ d.technique }}</span> {{ d.context.name or 'Unknown technique' }}</h2>
+        {% if not focus_is_selection %}<span class="muted small">Top work item</span>{% endif %}
+      </div>
+      <p>{{ ui.badge('accent' if d.status.state == 'eligible' else ('ok' if d.status.state == 'covered' else 'info'), d.status.state | replace('_', ' ') | capitalize) }} {{ d.status.text }}</p>
+
+      {% if d.candidate %}
+      <div class="section">
+        <h3>Why it needs work</h3>
+        <ul class="reasons">{% for reason in d.candidate.reasons %}<li>{{ reason }}</li>{% endfor %}</ul>
+      </div>
+      {% endif %}
+
+      <div class="section">
+        <h3>ATT&amp;CK context</h3>
+        <dl class="meta">
+          <dt>Tactics</dt><dd>{{ d.context.tactics | join(', ') or 'Not in the bundled catalog' }}</dd>
+          <dt>Platforms</dt><dd>{{ d.context.platforms | join(', ') or '-' }}</dd>
+          <dt>Family</dt><dd><span class="tech-id">{{ d.context.family }}</span> {{ d.context.family_name }} ({{ d.context.family_members | length }} active technique{{ '' if d.context.family_members | length == 1 else 's' }})</dd>
+          <dt>Named by</dt><dd>{% if d.reports %}{% for r in d.reports %}{{ r.name }} #{{ r.rank }}{% if not loop.last %}, {% endif %}{% endfor %}{% else %}No sample report{% endif %}</dd>
+        </dl>
+        <p class="small"><a href="{{ technique_url(d.technique) }}" rel="noopener noreferrer" target="_blank">{{ d.technique }} on attack.mitre.org (ATT&amp;CK {{ d.context.attack_version }})<span class="visually-hidden"> (opens in a new tab)</span></a></p>
+      </div>
+
+      <div class="section">
+        <h3>Matching rules</h3>
+        {% if d.exact_rules %}
+          <ul>{% for r in d.exact_rules %}<li><a href="{{ ctx_url('main.rules_view', technique=d.technique, rule=r.uid) }}">{{ r.title }}</a></li>{% endfor %}</ul>
+        {% else %}
+          <p class="muted">No rule in the library maps to {{ d.technique }} exactly.</p>
+        {% endif %}
+        <p class="small"><a href="{{ ctx_url('main.rules_view', technique=d.context.family, scope='family', rule=None) }}">{{ d.family_rules | length }} rule{{ '' if d.family_rules | length == 1 else 's' }} in family {{ d.context.family }}</a></p>
+      </div>
+
+      <div class="section">
+        <h3>Telemetry requirements</h3>
+        <p>{{ ui.feasibility_badge(d.telemetry.feasibility) }}</p>
+        {% if d.telemetry.mapped %}
+          <dl class="meta">
+            <dt>Available</dt><dd>{{ d.telemetry.available_sources | join(', ') or 'None' }}</dd>
+            <dt>Partial</dt><dd>{{ d.telemetry.partial_sources | join(', ') or 'None' }}</dd>
+            <dt>Missing</dt><dd>{{ d.telemetry.missing_sources | join(', ') or 'None' }}</dd>
+          </dl>
+          <p class="small muted">{{ d.telemetry.mapping.guidance }}</p>
+        {% else %}
+          <p class="muted small">{{ d.telemetry.recommended_action }}</p>
+        {% endif %}
+        <p class="small"><a href="{{ ctx_url('main.data_sources_view', technique=d.technique, rule=(d.exact_rules[0].uid if d.exact_rules else None)) }}">Open in Data Source Mapper</a></p>
+      </div>
+
+      <div class="section">
+        <h3>Plans</h3>
+        {% if d.plans %}
+          <ul>{% for p in d.plans %}<li><a href="{{ ctx_url('main.plan_detail', plan_id=p.id, technique=p.technique, rule=p.rule_uid) }}">Plan #{{ p.id }}: {{ p.title }}</a> {{ ui.plan_status_badge(p) }}</li>{% endfor %}</ul>
+        {% else %}
+          <p class="muted">No plan in this family yet.</p>
+        {% endif %}
+      </div>
+
+      <div class="section actions">
+        {% if d.exact_rules %}
+          <a class="button primary" href="{{ ctx_url('main.rules_view', technique=d.technique, rule=d.exact_rules[0].uid) }}">Review the matching rule</a>
+        {% endif %}
+        <a class="button{% if not d.exact_rules %} primary{% endif %}" href="{{ ctx_url('main.plan_new', technique=d.technique, rule=(d.exact_rules[0].uid if d.exact_rules else None), origin='gaps') }}">Create a rule plan</a>
+      </div>
+    {% else %}
+      <h2 id="detail-heading">Technique details</h2>
+      {{ ui.empty("Nothing selected.", " Choose a work item to see its ATT&CK context, matching rules and telemetry.") }}
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

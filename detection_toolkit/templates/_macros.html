@@ -1,0 +1,74 @@
+{#- Shared UI pieces. Import with: {% import "_macros.html" as ui with context %} -#}
+
+{% macro badge(tone, text) -%}
+  <span class="badge" data-tone="{{ tone }}">{{ text }}</span>
+{%- endmacro %}
+
+{% macro feasibility_badge(level) -%}
+  {%- set tones = {'High': 'ok', 'Medium': 'warn', 'Low': 'danger', 'Not Possible': 'danger', 'Needs Mapping': 'neutral', 'Unknown': 'neutral'} -%}
+  {{ badge(tones.get(level, 'neutral'), 'Telemetry: ' ~ level) }}
+{%- endmacro %}
+
+{% macro source_status_badge(status) -%}
+  {%- set tones = {'Available': 'ok', 'Partial': 'warn', 'Missing': 'danger', 'Unknown': 'neutral', 'Not Applicable': 'neutral'} -%}
+  {{ badge(tones.get(status, 'neutral'), status) }}
+{%- endmacro %}
+
+{% macro readiness_badge(state, label) -%}
+  {%- set tones = {'ready': 'ok', 'partial': 'warn', 'unavailable': 'danger', 'unmapped': 'neutral'} -%}
+  {{ badge(tones.get(state, 'neutral'), label) }}
+{%- endmacro %}
+
+{% macro plan_status_badge(plan) -%}
+  {%- set tones = {'planned': 'info', 'in_progress': 'accent', 'completed': 'ok', 'rejected': 'neutral'} -%}
+  {{ badge(tones.get(plan.status, 'neutral'), plan.status_label) }}
+{%- endmacro %}
+
+{% macro validation_badge(plan) -%}
+  {%- set tones = {'not_assessed': 'neutral', 'implementable': 'info', 'blocked': 'danger', 'validated': 'ok'} -%}
+  {{ badge(tones.get(plan.validation_status, 'neutral'), plan.validation_label) }}
+{%- endmacro %}
+
+{% macro page_head(title, lede) -%}
+  <div class="page-head{% if caller is defined %} has-action{% endif %}">
+    <div>
+      <h1>{{ title }}</h1>
+      <p class="lede">{{ lede }}</p>
+    </div>
+    {% if caller is defined %}{{ caller() }}{% endif %}
+  </div>
+{%- endmacro %}
+
+{% macro next_action(text) -%}
+  <aside class="next-action" aria-label="Next action">
+    <span class="label">Next action</span>
+    <p>{{ text }}</p>
+    <div class="actions">{{ caller() }}</div>
+  </aside>
+{%- endmacro %}
+
+{% macro empty(title, text) -%}
+  <div class="empty" role="status"><strong>{{ title }}</strong>{{ text }}</div>
+{%- endmacro %}
+
+{% macro technique_chip(technique) -%}
+  <a class="chip mono" href="{{ ctx_url('main.gaps_view', technique=technique) }}" title="Open {{ technique }} in Gap Prioritization">{{ technique }}</a>
+{%- endmacro %}
+
+{% macro field_error(errors, name) -%}
+  {% if errors.get(name) %}<p class="field-error" id="{{ name }}-error">{{ errors.get(name) }}</p>{% endif %}
+{%- endmacro %}
+
+{% macro invalid_attrs(errors, name) -%}
+  {% if errors.get(name) %} aria-invalid="true" aria-describedby="{{ name }}-error"{% endif %}
+{%- endmacro %}
+
+{% macro csrf_field() -%}
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{%- endmacro %}
+
+{% macro selection_fields() -%}
+  {%- set sel = g.selection or {} -%}
+  {% if sel.technique %}<input type="hidden" name="technique" value="{{ sel.technique }}">{% endif %}
+  {% if sel.rule %}<input type="hidden" name="rule" value="{{ sel.rule }}">{% endif %}
+{%- endmacro %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% import "_macros.html" as ui with context %}
+{% block title %}Rule Plan{% endblock %}
+{% block content %}
+{% set sel = g.selection or {} %}
+{% call ui.page_head("Rule Plan", "Plan rule work for an ATT&CK technique: the selected rule, the telemetry it needs, and its validation status and notes. Plans are stored only in this edition's local database.") %}
+  {% call ui.next_action(("Create a plan for " ~ sel.technique ~ (" with the selected rule" if sel.rule else "") ~ ".") if sel.technique else "Create a plan, or reopen one below to update its validation status.") %}
+    <a class="button primary" href="{{ ctx_url('main.plan_new', origin='manual') }}">Create a rule plan</a>
+  {% endcall %}
+{% endcall %}
+
+<form class="filters" method="get" action="{{ url_for('main.plans_view') }}" aria-label="Filter plans">
+  <div class="field">
+    <label for="technique">ATT&amp;CK ID <span class="hint">matches the whole family</span></label>
+    <input id="technique" name="technique" type="text" value="{{ sel.technique or '' }}" placeholder="T1059.001" pattern="[Tt][0-9]{4}(\.[0-9]{3})?" title="A technique ID such as T1059 or T1059.001" autocomplete="off">
+  </div>
+  <div class="field">
+    <label for="status">Status</label>
+    <select id="status" name="status">
+      <option value="">Any status</option>
+      {% for key, label in statuses.items() %}<option value="{{ key }}"{% if key == status %} selected{% endif %}>{{ label }} ({{ counts.get(key, 0) }})</option>{% endfor %}
+    </select>
+  </div>
+  {% if sel.rule %}<input type="hidden" name="rule" value="{{ sel.rule }}">{% endif %}
+  <div class="buttons">
+    <button class="button primary" type="submit">Apply filters</button>
+    <a class="button" href="{{ ctx_url('main.plans_view', technique=None) }}">Show all plans</a>
+  </div>
+</form>
+
+<div class="layout">
+<section aria-label="Plans">
+{% if items %}
+<div class="table-wrap">
+  <table class="data stack-sm">
+    <caption>{{ items | length }} plan{{ '' if items | length == 1 else 's' }}{% if sel.technique %} in the {{ sel.technique }} family{% endif %}. Lab validated is recorded evidence; it is separate from rule content in the library.</caption>
+    <thead>
+      <tr><th scope="col">Plan</th><th scope="col">ATT&amp;CK</th><th scope="col">Rule</th><th scope="col">Status</th><th scope="col">Validation</th><th scope="col">Updated (UTC)</th></tr>
+    </thead>
+    <tbody>
+    {% for p in items %}
+      <tr>
+        <td data-label="Plan"><a href="{{ ctx_url('main.plan_detail', plan_id=p.id, technique=p.technique, rule=p.rule_uid) }}">#{{ p.id }} {{ p.title }}</a></td>
+        <td data-label="ATT&amp;CK"><span class="tech-id">{{ p.technique }}</span> <span class="muted small">{{ p.technique_name }}</span></td>
+        <td data-label="Rule">{{ p.rule_title or 'No rule selected' }}</td>
+        <td data-label="Status">{{ ui.plan_status_badge(p) }}</td>
+        <td data-label="Validation">{{ ui.validation_badge(p) }}</td>
+        <td data-label="Updated (UTC)" class="mono small">{{ p.updated_at[:19] | replace('T', ' ') }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+  {{ ui.empty("No plans match.", " Create one from Gap Prioritization, Rule Search or the button above.") }}
+{% endif %}
+</section>
+
+<aside class="panel sticky" aria-labelledby="plan-summary-heading">
+  <h2 id="plan-summary-heading">Plan summary</h2>
+  <dl class="meta">
+    {% for key, label in statuses.items() %}<dt>{{ label }}</dt><dd>{{ counts.get(key, 0) }}</dd>{% endfor %}
+  </dl>
+  <div class="section">
+    <h3>Validation status</h3>
+    <ul class="small">
+      <li><strong>Not assessed</strong>: no telemetry or lab check recorded yet.</li>
+      <li><strong>Implementable</strong>: the telemetry the rule needs is available.</li>
+      <li><strong>Blocked</strong>: telemetry or rule logic is missing; the notes say what.</li>
+      <li><strong>Lab validated</strong>: lab evidence is recorded in the validation notes. Only this status counts as validated in ATT&amp;CK Coverage and Gap Prioritization.</li>
+    </ul>
+  </div>
+  {% if sel.technique %}
+  <div class="section actions">
+    <a class="button" href="{{ ctx_url('main.gaps_view') }}">Gap context for {{ sel.technique }}</a>
+  </div>
+  {% endif %}
+</aside>
+</div>
+{% endblock %}

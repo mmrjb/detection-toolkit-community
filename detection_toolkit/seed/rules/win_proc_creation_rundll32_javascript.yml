@@ -1,0 +1,27 @@
+title: Rundll32 Running a JavaScript Protocol Handler
+id: 5f6dce22-a167-4426-a36e-d7c4d610297b
+status: experimental
+description: >-
+  Detects rundll32.exe with "javascript:" in its command line, which runs
+  script content through a signed Windows binary.
+  Demo rule written for Detection Toolkit v0.1.
+references:
+  - https://attack.mitre.org/techniques/T1218/011/
+author: Detection Toolkit demo content
+date: 2026-11-11
+tags:
+  - attack.stealth
+  - attack.t1218.011
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_img:
+    - Image|endswith: '\rundll32.exe'
+    - OriginalFileName: 'RUNDLL32.EXE'
+  selection_cli:
+    CommandLine|contains: 'javascript:'
+  condition: all of selection_*
+falsepositives:
+  - Unlikely
+level: high
